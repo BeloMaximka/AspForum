@@ -1,0 +1,179 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<div class="modal fade" id="loginModal" tabindex="-1" style="display: none;" aria-hidden="true">
+	<div class="modal-dialog">
+
+		<!-- Modal content -->
+		<div class="modal-content">
+			<!-- Modal body -->
+			<div class="modal-body">
+
+				<!-- Pills navs -->
+				<ul class="nav nav-pills nav-justified mb-3" role="tablist">
+					<li class="nav-item" role="presentation">
+						<a class="nav-link" data-mdb-toggle="pill" href="#navbarLogin-login" role="tab" aria-selected="true">Login</a>
+					</li>
+					<li class="nav-item" role="presentation">
+						<a class="nav-link active show" data-mdb-toggle="pill" href="#navbarLogin-signup" role="tab" aria-selected="false" tabindex="-1">Register</a>
+					</li>
+				</ul>
+
+				<!-- Pills panels -->
+				<div class="tab-content">
+
+					<!--Panel 1-->
+					<div class="tab-pane fade" id="navbarLogin-login" role="tabpanel">
+
+						<!-- Default form login -->
+						<form id="login" class="text-center needs-validation" action="login" method="post" name="login-form">
+
+							<p class="status"></p>
+
+							<div class="text-center mb-3">
+								<div class="wp-social-login-widget">
+									<div class="wp-social-login-connect-with">Connect with:</div>
+									<div class="wp-social-login-provider-list">
+										<a rel="nofollow" href="" title="Connect with Facebook" class="btn btn-primary btn-floating mx-1 ripple-surface" data-provider="Facebook" role="button" style="min-width: 37px;"><i class="fab fa-facebook-f"></i></a>
+										<a rel="nofollow" href="" title="Connect with Google" class="btn btn-primary btn-floating mx-1" data-provider="Google" role="button"><i class="fab fa-google"></i></a>
+										<a rel="nofollow" href="" title="Connect with Twitter" class="btn btn-primary btn-floating mx-1" data-provider="Twitter" role="button"><i class="fab fa-twitter"></i></a>
+									</div>
+								</div>
+							</div>
+
+							<p class="text-center">or:</p>
+
+							<!-- Email input -->
+							<div class="form-outline form-auth-mdb mb-4">
+								<input type="text" id="username" class="form-control" name="username" required="">
+								<label class="form-label" for="username" style="margin-left: 0px;">Your e-mail or username</label>
+								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 146.4px;"></div><div class="form-notch-trailing"></div></div>
+							</div>
+
+							<!-- Password input -->
+							<div class="form-outline form-auth-mdb mb-4">
+								<input type="password" id="password" class="form-control" name="password" autocomplete="off" required="">
+								<label class="form-label" for="password" style="margin-left: 0px;">Your password</label>
+								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 92.8px;"></div><div class="form-notch-trailing"></div></div>
+							</div>
+
+							<!-- 2 column grid layout for inline styling -->
+							<div class="justify-content-center mb-4">
+								<a href="">Forgot password?</a>
+							</div>
+
+							<button class="btn btn-primary btn-block mb-4" type="submit" value="LOGIN">Sign in</button>
+
+							<!-- Register buttons -->
+							<div class="text-center">
+								<p>Not a member? <a href="#" class="auth-modal-toggle" data-auth-modal-tab="sign-up">Register</a></p>
+							</div>
+
+						</form>
+						<!-- Default form login -->
+
+					</div>
+					<!--/.Panel 1-->
+					<!--Panel 2-->
+					<div class="tab-pane fade in show active" id="navbarLogin-signup" role="tabpanel">
+
+						<!-- Default form register  -->
+						<form id="register" class="text-center needs-validation" action="register" method="post" name="register-form">
+
+							<!-- Social login -->
+
+							<p class="status"></p>
+
+							<div class="text-center mb-3">
+								<div class="wp-social-login-widget">
+									<div class="wp-social-login-connect-with">Connect with:</div>
+									<div class="wp-social-login-provider-list">
+										<a rel="nofollow" href="" title="Connect with Facebook" class="btn btn-primary btn-floating mx-1 ripple-surface" data-provider="Facebook" role="button" style="min-width: 37px;"><i class="fab fa-facebook-f"></i></a>
+										<a rel="nofollow" href="" title="Connect with Google" class="btn btn-primary btn-floating mx-1" data-provider="Google" role="button"><i class="fab fa-google"></i></a>
+										<a rel="nofollow" href="" title="Connect with Twitter" class="btn btn-primary btn-floating mx-1" data-provider="Twitter" role="button"><i class="fab fa-twitter"></i></a>
+									</div>
+								</div>
+							</div>
+							<!-- Social login -->
+
+							<p class="text-center">or:</p>
+
+							<!-- Name input -->
+							<div class="form-outline form-auth-mdb mb-4">
+								<input type="text" id="signonname" class="form-control" name="signonname" required="" minlength="3">
+								<label for="signonname" class="form-label" style="margin-left: 0px;">Your name</label>
+								<div class="invalid-feedback">Please provide a valid name.</div>
+								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
+							</div>
+
+							<!-- Username input -->
+							<div class="form-outline form-auth-mdb mb-4">
+								<input type="text" id="signonusername" class="form-control" name="signonusername" required="" minlength="3">
+								<label for="signonusername" class="form-label" style="margin-left: 0px;">Your username</label>
+								<div class="invalid-feedback">Please provide a valid username.</div>
+								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
+							</div>
+
+							<!-- Email input -->
+							<div class="form-outline form-auth-mdb mb-4">
+								<input type="email" id="signonemail" class="form-control" name="email" required="">
+								<label for="email" class="form-label" style="margin-left: 0px;">Your email</label>
+								<div class="invalid-feedback">Please provide a valid email.</div>
+								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
+							</div>
+
+							<!-- Password input -->
+							<div class="form-outline form-auth-mdb mb-4">
+								<input type="password" id="signonpassword" class="form-control" name="signonpassword" autocomplete="off" required="" minlength="5">
+								<label for="signonpassword" class="form-label" style="margin-left: 0px;">Your password</label>
+								<div class="invalid-feedback">Please provide a valid password.</div>
+								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
+							</div>
+
+							<!-- Repeat Password input -->
+							<div class="form-outline form-auth-mdb mb-4">
+								<input type="password" id="password2" class="form-control" name="password2" autocomplete="off" required="" minlength="5">
+								<label for="password2" class="form-label" style="margin-left: 0px;">Repeat password</label>
+								<div id="repeat-password-feedback" class="invalid-feedback">Please repeat the password.</div>
+								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
+							</div>
+
+							<!-- Subscribe checkbox -->
+							<div class="form-check d-flex justify-content-center">
+								<input type="checkbox" class="form-check-input me-1" id="newsletter" name="newsletter" value="subscribe">
+								<label class="form-check-label" for="newsletter">I agree </label>
+							</div>
+
+							<!-- Subscribe checkbox -->
+
+							<div class="form-text text-center small text-muted mb-4">
+								By signing up you agree to ... following the <a target="_blank" href="">Privacy Policy</a>.
+							</div>
+
+							<button class="btn btn-primary btn-block mb-3" id="AJAXAuthRegisterBtn" type="submit" value="SIGNUP">
+								Sign up
+							</button>
+
+						</form>
+						<!-- Default form register  -->
+
+					</div>
+					<!--/.Panel 2-->
+
+				</div>
+				<!-- Pills panels -->
+
+			</div>
+			<!-- Modal footer -->
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+					Close
+				</button>
+			</div>
+		</div>
+		<!-- Modal content -->
+	</div>
+</div>
