@@ -3,6 +3,7 @@
 *@
 @{
 }
+@model RegisterViewModel
 
 <div class="modal fade" id="loginModal" tabindex="-1" style="display: none;" aria-hidden="true">
 	<div class="modal-dialog">
@@ -81,7 +82,7 @@
 					<div class="tab-pane fade in show active" id="navbarLogin-signup" role="tabpanel">
 
 						<!-- Default form register  -->
-						<form id="register" class="text-center needs-validation" action="register" method="post" name="register-form">
+						<form id="register" class="text-center needs-validation" method="post" asp-controller="Account" asp-action="Register">
 
 							<!-- Social login -->
 
@@ -101,61 +102,49 @@
 
 							<p class="text-center">or:</p>
 
-							<!-- Name input -->
-							<div class="form-outline form-auth-mdb mb-4">
-								<input type="text" id="signonname" class="form-control" name="signonname" required="" minlength="3">
-								<label for="signonname" class="form-label" style="margin-left: 0px;">Your name</label>
-								<div class="invalid-feedback">Please provide a valid name.</div>
-								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
-							</div>
-
 							<!-- Username input -->
 							<div class="form-outline form-auth-mdb mb-4">
-								<input type="text" id="signonusername" class="form-control" name="signonusername" required="" minlength="3">
-								<label for="signonusername" class="form-label" style="margin-left: 0px;">Your username</label>
+								<input type="text" id="signonusername" class="form-control" asp-for="Username" required minlength="3">
+								<label asp-for="Username" class="form-label" style="margin-left: 0px;">Your username</label>
 								<div class="invalid-feedback">Please provide a valid username.</div>
 								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
 							</div>
 
 							<!-- Email input -->
 							<div class="form-outline form-auth-mdb mb-4">
-								<input type="email" id="signonemail" class="form-control" name="email" required="">
-								<label for="email" class="form-label" style="margin-left: 0px;">Your email</label>
+								<input type="email" id="signonemail" class="form-control" asp-for="Email" required="">
+								<label asp-for="Email" class="form-label" style="margin-left: 0px;">Your email</label>
 								<div class="invalid-feedback">Please provide a valid email.</div>
 								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
 							</div>
 
 							<!-- Password input -->
 							<div class="form-outline form-auth-mdb mb-4">
-								<input type="password" id="signonpassword" class="form-control" name="signonpassword" autocomplete="off" required="" minlength="5">
-								<label for="signonpassword" class="form-label" style="margin-left: 0px;">Your password</label>
+								<input type="password" id="signonpassword" class="form-control" asp-for="Password" autocomplete="off" required="" minlength="5">
+								<label asp-for="Password" class="form-label" style="margin-left: 0px;">Your password</label>
 								<div class="invalid-feedback">Please provide a valid password.</div>
 								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
 							</div>
 
 							<!-- Repeat Password input -->
 							<div class="form-outline form-auth-mdb mb-4">
-								<input type="password" id="password2" class="form-control" name="password2" autocomplete="off" required="" minlength="5">
-								<label for="password2" class="form-label" style="margin-left: 0px;">Repeat password</label>
-								<div id="repeat-password-feedback" class="invalid-feedback">Please repeat the password.</div>
+								<input type="password" id="signonpassword2" class="form-control" asp-for="PasswordConfirm" autocomplete="off" required="" minlength="5">
+								<label asp-for="PasswordConfirm" class="form-label" style="margin-left: 0px;">Repeat password</label>
+								<div asp-validation-for="PasswordConfirm" class="invalid-feedback">Password mismatch.</div>
 								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
 							</div>
 
-							<!-- Subscribe checkbox -->
+							<!-- Agree checkbox -->
 							<div class="form-check d-flex justify-content-center">
-								<input type="checkbox" class="form-check-input me-1" id="newsletter" name="newsletter" value="subscribe">
-								<label class="form-check-label" for="newsletter">I agree </label>
+								<input type="checkbox" id="signonagree" class="form-check-input me-1" asp-for="IsAgree" required>
+								<label class="form-check-label" asp-for="IsAgree">I have read and agree to the terms</label>
 							</div>
 
-							<!-- Subscribe checkbox -->
-
-							<div class="form-text text-center small text-muted mb-4">
-								By signing up you agree to ... following the <a target="_blank" href="">Privacy Policy</a>.
-							</div>
-
-							<button class="btn btn-primary btn-block mb-3" id="AJAXAuthRegisterBtn" type="submit" value="SIGNUP">
+							<button class="btn btn-primary btn-block mb-3" id="RegisterBtn" type="button" onsubmit="return false" value="SIGNUP">
 								Sign up
 							</button>
+
+							<div id="signonfeedback" class="text-danger"></div>
 
 						</form>
 						<!-- Default form register  -->
@@ -177,3 +166,63 @@
 		<!-- Modal content -->
 	</div>
 </div>
+
+<script type="text/javascript">
+	document.addEventListener("DOMContentLoaded", () => {
+
+		// Register form elements
+		const registerBtn = document.getElementById("RegisterBtn");
+		const usernameInput = document.getElementById("signonusername");
+		const emailInput = document.getElementById("signonemail");
+		const passwordInput = document.getElementById("signonpassword");
+		const passwordConfirmInput = document.getElementById("signonpassword2");
+		const isAgreeInput = document.getElementById("signonagree");
+		const registerForm = document.getElementById("register");
+		const serverFeedback = document.getElementById("signonfeedback");
+
+		registerBtn.addEventListener("click", () => {
+			registerForm.classList.add("was-validated");
+			serverFeedback.innerText = "";
+
+			// Password match validation
+			const password = passwordInput.value;
+			const passwordConfirm = passwordConfirmInput.value;
+			if(password !== passwordConfirm) {
+				passwordConfirmInput.classList.add("is-invalid");
+				return;
+			}
+			else {
+				passwordConfirmInput.classList.remove("is-invalid");
+			}
+
+			if (registerForm.checkValidity()) {
+				const username = usernameInput.value;
+				const email = emailInput.value;
+				const isAgree = isAgreeInput.value;
+
+				fetch("Account/Register", {
+					body: `Username=${username}&Email=${email}&Password=${password}&PasswordConfirm=${passwordConfirm}&IsAgree=${isAgree}`,
+					headers: {
+						"Content-Type": "application/x-www-form-urlencoded",
+					},
+					method: "post",
+				})
+					.then(r => r.json())
+					.then(j => {
+						console.log(j);
+						if (j.success === true) {
+							window.location.href = "/Account/SuccessfulRegistration";
+						}
+						else {
+							j.errors.forEach(e => serverFeedback.innerText += e + "\n");
+						}
+					});
+			}
+			else
+			{
+				registerForm.reportValidity();
+				return;
+			}
+		});
+	});
+</script>

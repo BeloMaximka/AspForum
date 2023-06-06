@@ -1,3 +1,8 @@
+using AspForum.Data.Entities;
+using AspForum.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
 namespace AspForum
 {
     public class Program
@@ -9,7 +14,14 @@ namespace AspForum
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-            var app = builder.Build();
+			var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+			builder.Services.AddDbContext<ApplicationContext>(options =>
+				options.UseSqlServer(connectionString));
+
+			builder.Services.AddIdentity<User, IdentityRole>()
+				.AddEntityFrameworkStores<ApplicationContext>();
+
+			var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -24,6 +36,7 @@ namespace AspForum
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
