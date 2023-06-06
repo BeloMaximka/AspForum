@@ -48,5 +48,34 @@ namespace AspForum.Controllers
 			}
 			return result;
 		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<LoginResult> Login(LoginViewModel model)
+		{
+			LoginResult response = new();
+			if (ModelState.IsValid)
+			{
+				var result =
+					await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, false);
+				if (result.Succeeded)
+				{
+					response.Success = true;
+				}
+				else
+				{
+					response.Message = "Incorrect username or password";
+				}
+			}
+			return response;
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Logout()
+		{
+			await _signInManager.SignOutAsync();
+			return RedirectToAction("Index", "Home");
+		}
 	}
 }

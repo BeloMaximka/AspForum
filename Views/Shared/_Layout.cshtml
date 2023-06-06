@@ -29,7 +29,21 @@
 						</li>
 					</ul>
 				</div>
-				<button type="button" class="btn btn-primary ms-2 me-1" data-mdb-toggle="modal" data-mdb-target="#loginModal">Login</button>
+				@if (User?.Identity?.IsAuthenticated == true)
+				{
+					<div>
+						<span>@User.Identity.Name</span>
+						<form method="post" style="display: inline-block" asp-controller="Account" asp-action="Logout">
+							<input class="btn btn-primary" style="margin-left: 8px" type="submit" value="Log Out" />
+						</form>
+					</div>
+					
+				}
+				else
+				{
+					<button type="button" class="btn btn-primary ms-2 me-1" data-mdb-toggle="modal" data-mdb-target="#loginModal">Login</button>
+				}
+
 				<partial name="_LoginModalPartial" />
 
 			</div>
@@ -47,6 +61,7 @@
 		</div>
 	</footer>
 
+	@Html.AntiForgeryToken()
 	<script src="~/lib/jquery/dist/jquery.min.js"></script>
 	<script src="~/lib/mdb/dist/js/mdb.min.js"></script>
 	<script src="~/js/site.js" asp-append-version="true"></script>

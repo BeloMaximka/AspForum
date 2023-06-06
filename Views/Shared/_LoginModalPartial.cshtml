@@ -3,7 +3,6 @@
 *@
 @{
 }
-@model RegisterViewModel
 
 <div class="modal fade" id="loginModal" tabindex="-1" style="display: none;" aria-hidden="true">
 	<div class="modal-dialog">
@@ -26,11 +25,11 @@
 				<!-- Pills panels -->
 				<div class="tab-content">
 
-					<!--Panel 1-->
+					<!--Login Panel-->
 					<div class="tab-pane fade" id="navbarLogin-login" role="tabpanel">
 
 						<!-- Default form login -->
-						<form id="login" class="text-center needs-validation" action="login" method="post" name="login-form">
+						<form id="loginForm" class="text-center needs-validation" method="post" asp-controller="Account" asp-action="Register">
 
 							<p class="status"></p>
 
@@ -49,16 +48,22 @@
 
 							<!-- Email input -->
 							<div class="form-outline form-auth-mdb mb-4">
-								<input type="text" id="username" class="form-control" name="username" required="">
-								<label class="form-label" for="username" style="margin-left: 0px;">Your e-mail or username</label>
+								<input type="text" id="loginUsername" class="form-control" required="">
+								<label class="form-label" for="loginUsername" style="margin-left: 0px;">Your e-mail or username</label>
 								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 146.4px;"></div><div class="form-notch-trailing"></div></div>
 							</div>
 
 							<!-- Password input -->
 							<div class="form-outline form-auth-mdb mb-4">
-								<input type="password" id="password" class="form-control" name="password" autocomplete="off" required="">
-								<label class="form-label" for="password" style="margin-left: 0px;">Your password</label>
+								<input type="password" id="loginPassword" class="form-control" autocomplete="off" required="">
+								<label class="form-label" for="loginPassword" style="margin-left: 0px;">Your password</label>
 								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 92.8px;"></div><div class="form-notch-trailing"></div></div>
+							</div>
+
+							<!-- Remember me checkbox -->
+							<div class="form-check d-flex justify-content-start">
+								<input type="checkbox" id="loginRememberMe" class="form-check-input me-1" >
+								<label class="form-check-label" for="loginRememberMe">Remember me</label>
 							</div>
 
 							<!-- 2 column grid layout for inline styling -->
@@ -66,7 +71,9 @@
 								<a href="">Forgot password?</a>
 							</div>
 
-							<button class="btn btn-primary btn-block mb-4" type="submit" value="LOGIN">Sign in</button>
+							<button id="LoginBtn" class="btn btn-primary btn-block mb-4" type="button">Sign in</button>
+
+							<div id="loginFeedback" class="text-danger"></div>
 
 							<!-- Register buttons -->
 							<div class="text-center">
@@ -77,12 +84,12 @@
 						<!-- Default form login -->
 
 					</div>
-					<!--/.Panel 1-->
-					<!--Panel 2-->
+					<!--/.Login Panel-->
+					<!--Registration Panel -->
 					<div class="tab-pane fade in show active" id="navbarLogin-signup" role="tabpanel">
 
 						<!-- Default form register  -->
-						<form id="register" class="text-center needs-validation" method="post" asp-controller="Account" asp-action="Register">
+						<form id="registerForm" class="text-center needs-validation" method="post" asp-controller="Account" asp-action="Register">
 
 							<!-- Social login -->
 
@@ -104,53 +111,53 @@
 
 							<!-- Username input -->
 							<div class="form-outline form-auth-mdb mb-4">
-								<input type="text" id="signonusername" class="form-control" asp-for="Username" required minlength="3">
-								<label asp-for="Username" class="form-label" style="margin-left: 0px;">Your username</label>
+								<input type="text" id="registerUsername" class="form-control" required minlength="3">
+								<label class="form-label" style="margin-left: 0px;">Your username</label>
 								<div class="invalid-feedback">Please provide a valid username.</div>
 								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
 							</div>
 
 							<!-- Email input -->
 							<div class="form-outline form-auth-mdb mb-4">
-								<input type="email" id="signonemail" class="form-control" asp-for="Email" required="">
-								<label asp-for="Email" class="form-label" style="margin-left: 0px;">Your email</label>
+								<input type="email" id="registerEmail" class="form-control" required="">
+								<label class="form-label" style="margin-left: 0px;">Your email</label>
 								<div class="invalid-feedback">Please provide a valid email.</div>
 								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
 							</div>
 
 							<!-- Password input -->
 							<div class="form-outline form-auth-mdb mb-4">
-								<input type="password" id="signonpassword" class="form-control" asp-for="Password" autocomplete="off" required="" minlength="5">
-								<label asp-for="Password" class="form-label" style="margin-left: 0px;">Your password</label>
+								<input type="password" id="registerPassword" class="form-control" autocomplete="off" required="" minlength="5">
+								<label class="form-label" style="margin-left: 0px;">Your password</label>
 								<div class="invalid-feedback">Please provide a valid password.</div>
 								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
 							</div>
 
 							<!-- Repeat Password input -->
 							<div class="form-outline form-auth-mdb mb-4">
-								<input type="password" id="signonpassword2" class="form-control" asp-for="PasswordConfirm" autocomplete="off" required="" minlength="5">
-								<label asp-for="PasswordConfirm" class="form-label" style="margin-left: 0px;">Repeat password</label>
+								<input type="password" id="registerPasswordConfirm" class="form-control" autocomplete="off" required="" minlength="5">
+								<label class="form-label" style="margin-left: 0px;">Repeat password</label>
 								<div asp-validation-for="PasswordConfirm" class="invalid-feedback">Password mismatch.</div>
 								<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
 							</div>
 
 							<!-- Agree checkbox -->
 							<div class="form-check d-flex justify-content-center">
-								<input type="checkbox" id="signonagree" class="form-check-input me-1" asp-for="IsAgree" required>
-								<label class="form-check-label" asp-for="IsAgree">I have read and agree to the terms</label>
+								<input type="checkbox" id="registerIsAgree" class="form-check-input me-1" required>
+								<label class="form-check-label" for="registerIsAgree">I have read and agree to the terms</label>
 							</div>
 
 							<button class="btn btn-primary btn-block mb-3" id="RegisterBtn" type="button" onsubmit="return false" value="SIGNUP">
 								Sign up
 							</button>
 
-							<div id="signonfeedback" class="text-danger"></div>
+							<div id="registerFeedback" class="text-danger"></div>
 
 						</form>
 						<!-- Default form register  -->
 
 					</div>
-					<!--/.Panel 2-->
+					<!--/.Registration Panel -->
 
 				</div>
 				<!-- Pills panels -->
@@ -169,36 +176,37 @@
 
 <script type="text/javascript">
 	document.addEventListener("DOMContentLoaded", () => {
+		const antiForgeryToken = document.querySelectorAll('input[name=__RequestVerificationToken]')[0].value;
 
-		// Register form elements
+		// Register
 		const registerBtn = document.getElementById("RegisterBtn");
-		const usernameInput = document.getElementById("signonusername");
-		const emailInput = document.getElementById("signonemail");
-		const passwordInput = document.getElementById("signonpassword");
-		const passwordConfirmInput = document.getElementById("signonpassword2");
-		const isAgreeInput = document.getElementById("signonagree");
-		const registerForm = document.getElementById("register");
-		const serverFeedback = document.getElementById("signonfeedback");
+		const registerUsernameInput = document.getElementById("registerUsername");
+		const registerEmailInput = document.getElementById("registerEmail");
+		const registerPasswordInput = document.getElementById("registerPassword");
+		const registerPasswordConfirmInput = document.getElementById("registerPasswordConfirm");
+		const isAgreeInput = document.getElementById("registerIsAgree");
+		const registerForm = document.getElementById("registerForm");
+		const registerServerFeedback = document.getElementById("registerFeedback");
 
 		registerBtn.addEventListener("click", () => {
 			registerForm.classList.add("was-validated");
-			serverFeedback.innerText = "";
+			registerServerFeedback.innerText = "";
 
 			// Password match validation
-			const password = passwordInput.value;
-			const passwordConfirm = passwordConfirmInput.value;
+			const password = registerPasswordInput.value;
+			const passwordConfirm = registerPasswordConfirmInput.value;
 			if(password !== passwordConfirm) {
-				passwordConfirmInput.classList.add("is-invalid");
+				registerPasswordConfirmInput.classList.add("is-invalid");
 				return;
 			}
 			else {
-				passwordConfirmInput.classList.remove("is-invalid");
+				registerPasswordConfirmInput.classList.remove("is-invalid");
 			}
 
 			if (registerForm.checkValidity()) {
-				const username = usernameInput.value;
-				const email = emailInput.value;
-				const isAgree = isAgreeInput.value;
+				const username = registerUsernameInput.value;
+				const email = registerEmailInput.value;
+				const isAgree = isAgreeInput.checked;
 
 				fetch("Account/Register", {
 					body: `Username=${username}&Email=${email}&Password=${password}&PasswordConfirm=${passwordConfirm}&IsAgree=${isAgree}`,
@@ -209,12 +217,11 @@
 				})
 					.then(r => r.json())
 					.then(j => {
-						console.log(j);
 						if (j.success === true) {
 							window.location.href = "/Account/SuccessfulRegistration";
 						}
 						else {
-							j.errors.forEach(e => serverFeedback.innerText += e + "\n");
+							j.errors.forEach(e => registerServerFeedback.innerText += e + "\n");
 						}
 					});
 			}
@@ -223,6 +230,39 @@
 				registerForm.reportValidity();
 				return;
 			}
+		});
+
+		// Login
+		const loginForm = document.getElementById("loginForm");
+		const loginBtn = document.getElementById("LoginBtn");
+		const loginUsernameInput = document.getElementById("loginUsername");
+		const loginPasswordInput = document.getElementById("loginPassword");
+		const loginRememberMe = document.getElementById("loginRememberMe");
+		const loginServerFeedback = document.getElementById("loginFeedback");
+
+		loginBtn.addEventListener("click", () => {
+			loginServerFeedback.innerText = "";
+
+			const username = loginUsernameInput.value;
+			const password = loginPasswordInput.value;
+			const rememberMe = loginRememberMe.checked;
+
+			fetch("Account/Login", {
+				body: `Username=${username}&Password=${password}&RememberMe=${rememberMe}&__RequestVerificationToken=${antiForgeryToken}`,
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				method: "post",
+			})
+				.then(r => r.json())
+				.then(j => {
+					if (j.success === true) {
+						window.location.reload();
+					}
+					else {
+						loginServerFeedback.innerText = j.message;
+					}
+				});
 		});
 	});
 </script>
