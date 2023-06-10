@@ -18,8 +18,19 @@ namespace AspForum
 			builder.Services.AddDbContext<ApplicationContext>(options =>
 				options.UseSqlServer(connectionString));
 
+			builder.Services.AddAuthentication()
+				.AddGoogle(options =>
+				{
+					IConfigurationSection googleAuthNSection =
+					builder.Configuration.GetSection("Authentication:Google");
+					options.ClientId = googleAuthNSection["ClientId"];
+					options.ClientSecret = googleAuthNSection["ClientSecret"];
+				});
+
 			builder.Services.AddIdentity<User, IdentityRole>()
-				.AddEntityFrameworkStores<ApplicationContext>();
+				.AddEntityFrameworkStores<ApplicationContext>()
+                .AddDefaultUI()
+                .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
 
 			var app = builder.Build();
 
