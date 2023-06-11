@@ -1,0 +1,49 @@
+﻿@model ForumIndexViewModel
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<div>
+	@foreach (var sectionItem in Model.Sections)
+	{
+		string id = "section-" + sectionItem.Id.ToString();
+		<div class="card mb-3">
+			<div class="card-body">
+				<div class="d-flex justify-content-between">
+					<h5>@sectionItem.Title</h5>
+					<button type="button"
+							class="btn btn-primary"
+							data-mdb-toggle="collapse"
+							data-mdb-target="#@id"
+							aria-expanded="true"
+							aria-controls="@id">
+						S
+					</button>
+				</div>
+				<div class="collapse show mt-3" id="@id">
+					@foreach (var theme in sectionItem.Themes)
+					{
+						<p>@theme.Title</p>
+					}
+				</div>
+			</div>
+		</div>
+	}
+</div>
+
+@if(User.Identity.IsAuthenticated) {
+	<div class="card">
+		<div class="card-body">
+			<h5>Add new section</h5>
+			<form method="post" enctype="multipart/form-data" method="post">
+				<div class="d-flex gap-3">
+					<input class="form-control d-inline flex-fill" style="width: auto" required name="title">
+					<button type="submit" asp-action="CreateSection" class="btn btn-primary">Add</button>
+				</div>
+				<div class="validation" asp-validation-summary="All" />
+			</form>
+		</div>
+	</div>
+}

@@ -27,7 +27,7 @@ namespace AspForum
 					options.ClientSecret = googleAuthNSection["ClientSecret"];
 				});
 
-			builder.Services.AddIdentity<User, IdentityRole>()
+			builder.Services.AddIdentity<User, Role>()
 				.AddEntityFrameworkStores<ApplicationContext>()
                 .AddDefaultUI()
                 .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);

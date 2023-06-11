@@ -15,7 +15,7 @@ namespace AspForum.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction("Index", "Forum");
         }
 
         public IActionResult Privacy()
@@ -28,5 +28,5 @@ namespace AspForum.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-    }
+	}
 }

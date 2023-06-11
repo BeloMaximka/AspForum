@@ -2,8 +2,7 @@
 
 namespace AspForum.Data.Entities
 {
-	public class User : IdentityUser<Guid>
+	public class Role : IdentityRole<Guid>
 	{
-		public string? AvatarUrl { get; set; }
 	}
 }
