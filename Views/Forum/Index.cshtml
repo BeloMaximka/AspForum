@@ -6,33 +6,47 @@
 }
 
 <div>
+	<!-- Sections -->
 	@foreach (var sectionItem in Model.Sections)
 	{
-		string id = "section-" + sectionItem.Id.ToString();
-		<div class="card mb-3">
-			<div class="card-body">
-				<div class="d-flex justify-content-between">
-					<h5>@sectionItem.Title</h5>
-					<button type="button"
-							class="btn btn-primary"
-							data-mdb-toggle="collapse"
-							data-mdb-target="#@id"
-							aria-expanded="true"
-							aria-controls="@id">
-						S
-					</button>
-				</div>
-				<div class="collapse show mt-3" id="@id">
-					@foreach (var theme in sectionItem.Themes)
-					{
-						<p>@theme.Title</p>
-					}
-				</div>
-			</div>
-		</div>
+		@Html.DisplayFor(m => sectionItem, "ForumSection");
 	}
 </div>
 
+<!-- Add theme modal -->
+<div class="modal fade" id="addThemeModal" tabindex="-1" aria-labelledby="addThemeModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="addThemeModallLabel">Add theme</h5>
+				<button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<form id="addThemeForm" class="text-center needs-validation" method="post">
+				<div class="modal-body">
+					<input id="sectionId" name="sectionid" hidden />
+					<!-- Title input -->
+					<div class="form-outline form-auth-mdb mb-4">
+						<input type="text" id="themeTitle" name="title" class="form-control" required="">
+						<label class="form-label" for="themeTitle" style="margin-left: 0px;">Title</label>
+						<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 146.4px;"></div><div class="form-notch-trailing"></div></div>
+					</div>
+
+					<!-- Description input -->
+					<div class="form-outline form-auth-mdb mb-4">
+						<input type="text" id="themeDesc" name="description" class="form-control" autocomplete="off" required="">
+						<label class="form-label" for="themeDesc" style="margin-left: 0px;">Description</label>
+						<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 92.8px;"></div><div class="form-notch-trailing"></div></div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="submit" asp-action="CreateTheme" class="btn btn-primary">Add</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- Add section form -->
 @if(User.Identity.IsAuthenticated) {
 	<div class="card">
 		<div class="card-body">
@@ -47,3 +61,18 @@
 		</div>
 	</div>
 }
+
+<script type="text/javascript">
+	document.addEventListener("DOMContentLoaded", () => {
+		const sectionIdInput = document.getElementById("sectionId");
+		const addThemeModal = new mdb.Modal(document.getElementById('addThemeModal'), {});
+		function addThemeClick(e) {
+			console.log(e.target);
+			sectionIdInput.value = e.target.getAttribute("data-section-id");
+			addThemeModal.show();
+		}
+		for (let pencil of document.querySelectorAll("[data-section-id]")) {
+			pencil.onclick = addThemeClick;
+		}
+	});
+</script>

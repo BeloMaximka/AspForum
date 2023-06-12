@@ -1,0 +1,53 @@
+﻿@model SectionViewModel
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+	string id = "section-" + Model.Id.ToString();
+}
+
+<div class="card mb-3">
+	<div class="card-header">
+		<div class="d-flex justify-content-between">
+			<div>
+				<h5 class="d-inline-block mt-2">@Model.Title</h5>
+				@if (User.Identity.IsAuthenticated)
+				{
+					<!-- Add theme button -->
+					<button type="button"
+							class="btn btn-tertiary px-1 mx-1 fas fa-plus"
+							style="font-size: 1.5em; padding-top: 0; padding-bottom: 0;"
+							data-mdb-toggle="modal"
+							data-mdb-target="#addThemeModal"
+							data-section-id="@Model.Id.ToString()">
+					</button>
+				}
+			</div>
+
+			<!-- Collaplse themes button -->
+			<button type="button"
+					class="btn btn-tertiary px-1"
+					data-mdb-ripple-color="light"
+					data-mdb-toggle="collapse"
+					data-mdb-target="#@id"
+					aria-expanded="true"
+					aria-controls="@id">
+				<i class="fas fa-angle-down" style="font-size: 1.5em;"></i>
+			</button>
+		</div>
+	</div>
+	<div class="card-body">
+
+		<div class="collapse show mt-3" id="@id">
+			<!-- Themes -->
+			@foreach (var theme in Model.Themes)
+			{
+				@Html.DisplayFor(m => theme, "ForumTheme")
+			}
+			@if (Model.Themes.Count == 0)
+			{
+				<p>No themes.</p>
+			}
+		</div>
+	</div>
+</div>

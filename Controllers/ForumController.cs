@@ -7,6 +7,7 @@ namespace AspForum.Controllers
 	public class ForumController : Controller
 	{
 		private readonly ApplicationContext _context;
+		private readonly ILogger<ForumController> _logger;
 
 		public ForumController(ApplicationContext context)
 		{
@@ -25,15 +26,46 @@ namespace AspForum.Controllers
 			return View(model);
 		}
 
+		[HttpPost]
 		public async Task<IActionResult> CreateSection(SectionFormViewModel model)
 		{
-			if (ModelState.IsValid)
+			if (ModelState.IsValid && User.Identity.IsAuthenticated )
 			{
 				_context.Sections.Add(new Data.Entities.Section()
 				{
 					Title = model.Title,
 				});
-				await _context.SaveChangesAsync();
+				try
+				{
+					await _context.SaveChangesAsync();
+				}
+				catch (Exception e)
+				{
+					_logger.LogError(e.Message);
+				}
+			}
+			return RedirectToAction("Index");
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> CreateTheme(ThemeFormViewModel model)
+		{
+			if (ModelState.IsValid && User.Identity.IsAuthenticated)
+			{
+				_context.Themes.Add(new Data.Entities.Theme()
+				{
+					SectionId = model.SectionId,
+					Title = model.Title,
+					Description = model.Description,
+				});
+				try
+				{
+					await _context.SaveChangesAsync();
+				}
+				catch (Exception e)
+				{
+					_logger.LogError(e.Message);
+				}
 			}
 			return RedirectToAction("Index");
 		}
