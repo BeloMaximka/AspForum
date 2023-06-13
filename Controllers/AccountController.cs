@@ -101,7 +101,7 @@ namespace AspForum.Controllers
 				return LocalRedirect(returnUrl);
 			}
 			var info = await _signInManager.GetExternalLoginInfoAsync();
-			if (info == null)
+			if (info == null || info.Principal.Identity is null)
 			{
 				//ErrorMessage = "Error loading external login information.";
 				return LocalRedirect(returnUrl);

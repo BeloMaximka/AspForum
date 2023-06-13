@@ -47,7 +47,8 @@
 </div>
 
 <!-- Add section form -->
-@if(User.Identity.IsAuthenticated) {
+@if (User.Identity is not null && User.Identity.IsAuthenticated)
+{
 	<div class="card">
 		<div class="card-body">
 			<h5>Add new section</h5>

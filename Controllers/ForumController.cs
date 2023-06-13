@@ -59,7 +59,7 @@ namespace AspForum.Controllers
 		}
 		public async Task<IActionResult> Topic([FromRoute] Guid id)
 		{
-			var topic = await _context.Topics.FindAsync(id);
+			var topic = await _context.Topics.Include(p => p.Author).FirstAsync(t => t.Id == id);
 			if (topic != null)
 			{
 				return View(topic);
@@ -70,7 +70,7 @@ namespace AspForum.Controllers
 		[HttpPost]
 		public async Task<IActionResult> CreateSection(SectionFormViewModel model)
 		{
-			if (ModelState.IsValid && User.Identity.IsAuthenticated )
+			if (ModelState.IsValid && User.Identity is not null && User.Identity.IsAuthenticated )
 			{
 				_context.Sections.Add(new Section()
 				{
@@ -91,7 +91,7 @@ namespace AspForum.Controllers
 		[HttpPost]
 		public async Task<IActionResult> CreateTheme(ThemeFormViewModel model)
 		{
-			if (ModelState.IsValid && User.Identity.IsAuthenticated)
+			if (ModelState.IsValid && User.Identity is not null && User.Identity.IsAuthenticated)
 			{
 				_context.Themes.Add(new Theme()
 				{
@@ -114,7 +114,7 @@ namespace AspForum.Controllers
 		[HttpPost]
 		public async Task<IActionResult> CreateTopic(TopicFormViewModel model)
 		{
-			if (ModelState.IsValid && User.Identity.IsAuthenticated)
+			if (ModelState.IsValid && User.Identity is not null && User.Identity.IsAuthenticated)
 			{
 				Guid id = Guid.NewGuid();
 				_context.Topics.Add(new Topic()
