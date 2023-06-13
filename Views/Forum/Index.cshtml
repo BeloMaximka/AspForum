@@ -9,7 +9,7 @@
 	<!-- Sections -->
 	@foreach (var sectionItem in Model.Sections)
 	{
-		@Html.DisplayFor(m => sectionItem, "ForumSection");
+		@Html.DisplayFor(m => sectionItem, "ForumSection")
 	}
 </div>
 
@@ -71,8 +71,8 @@
 			sectionIdInput.value = e.target.getAttribute("data-section-id");
 			addThemeModal.show();
 		}
-		for (let pencil of document.querySelectorAll("[data-section-id]")) {
-			pencil.onclick = addThemeClick;
+		for (let button of document.querySelectorAll("[data-section-id]")) {
+			button.onclick = addThemeClick;
 		}
 	});
 </script>

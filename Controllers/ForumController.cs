@@ -1,6 +1,9 @@
 ﻿using AspForum.Data;
 using AspForum.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using AspForum.Data.Entities;
 
 namespace AspForum.Controllers
 {
@@ -8,10 +11,15 @@ namespace AspForum.Controllers
 	{
 		private readonly ApplicationContext _context;
 		private readonly ILogger<ForumController> _logger;
+		private readonly UserManager<User> _userManager;
 
-		public ForumController(ApplicationContext context)
+		public ForumController(ApplicationContext context, 
+			ILogger<ForumController> logger,
+			UserManager<User> userManager)
 		{
 			_context = context;
+			_logger = logger;
+			_userManager = userManager;
 		}
 
 		public IActionResult Index()
@@ -26,12 +34,45 @@ namespace AspForum.Controllers
 			return View(model);
 		}
 
+		public async Task<IActionResult> Theme([FromRoute] Guid id)
+		{
+			var theme = await _context.Themes.FindAsync(id);
+			if(theme != null )
+			{
+                ThemeViewModel model = new()
+                {
+                    Id = theme.Id.ToString(),
+                    Title = theme.Title,
+                    Topics = await _context.Topics
+						.Where(t => t.ThemeId == id)
+						.Select(t => new TopicViewModel()
+						{
+							Id = t.Id,
+							Title = t.Title,
+							AuthorName = t.Author.UserName,
+							CreationDateString = t.CreatedDt.ToShortDateString(),
+						}).ToListAsync()
+                };
+                return View(model);
+            }
+			return RedirectToAction("PageNotFound", "Home");
+		}
+		public async Task<IActionResult> Topic([FromRoute] Guid id)
+		{
+			var topic = await _context.Topics.FindAsync(id);
+			if (topic != null)
+			{
+				return View(topic);
+			}
+			return RedirectToAction("PageNotFound", "Home");
+		}
+
 		[HttpPost]
 		public async Task<IActionResult> CreateSection(SectionFormViewModel model)
 		{
 			if (ModelState.IsValid && User.Identity.IsAuthenticated )
 			{
-				_context.Sections.Add(new Data.Entities.Section()
+				_context.Sections.Add(new Section()
 				{
 					Title = model.Title,
 				});
@@ -52,7 +93,7 @@ namespace AspForum.Controllers
 		{
 			if (ModelState.IsValid && User.Identity.IsAuthenticated)
 			{
-				_context.Themes.Add(new Data.Entities.Theme()
+				_context.Themes.Add(new Theme()
 				{
 					SectionId = model.SectionId,
 					Title = model.Title,
@@ -61,6 +102,34 @@ namespace AspForum.Controllers
 				try
 				{
 					await _context.SaveChangesAsync();
+				}
+				catch (Exception e)
+				{
+					_logger.LogError(e.Message);
+				}
+			}
+			return RedirectToAction("Index");
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> CreateTopic(TopicFormViewModel model)
+		{
+			if (ModelState.IsValid && User.Identity.IsAuthenticated)
+			{
+				Guid id = Guid.NewGuid();
+				_context.Topics.Add(new Topic()
+				{
+					Id = id,
+					ThemeId = model.ThemeId,
+					AuthorId = (await _userManager.FindByNameAsync(User.Identity.Name)).Id,
+					Title = model.Title,
+					Description = model.Description,
+					CreatedDt = DateTime.UtcNow
+				});
+				try
+				{
+					await _context.SaveChangesAsync();
+					return RedirectToAction("Topic", new { id});
 				}
 				catch (Exception e)
 				{

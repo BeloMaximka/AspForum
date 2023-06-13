@@ -1,0 +1,65 @@
+﻿@model ThemeViewModel
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<!-- Create topic -->
+@if (User.Identity.IsAuthenticated)
+{
+	<div class="card mb-3">
+		<div class="card-body">
+			<!-- Add topic button -->
+			<button id="addTopicBtn" type="button" class="btn btn-primary"
+					data-mdb-toggle="modal"
+					data-mdb-target="#addTopicModal"
+					data-theme-id="@Model.Id.ToString()">
+				Create topic
+			</button>
+		</div>
+	</div>
+
+
+	<!-- Add topic modal -->
+	<div class="modal fade" id="addTopicModal" tabindex="-1" aria-labelledby="addTopicModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="addTopicModallLabel">Add topic</h5>
+					<button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<form id="addTopicForm" class="text-center needs-validation" method="post">
+					<div class="modal-body">
+						<input id="themeId" name="themeid" value="@Model.Id" hidden />
+						<!-- Title input -->
+						<div class="form-outline form-auth-mdb mb-4">
+							<input type="text" id="topicTitle" name="title" class="form-control" required="">
+							<label class="form-label" for="topicTitle" style="margin-left: 0px;">Title</label>
+							<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 146.4px;"></div><div class="form-notch-trailing"></div></div>
+						</div>
+
+						<!-- Description input -->
+						<div class="form-outline form-auth-mdb mb-4">
+							<input type="text" id="topicDesc" name="description" class="form-control" autocomplete="off" required="">
+							<label class="form-label" for="topicDesc" style="margin-left: 0px;">Description</label>
+							<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 92.8px;"></div><div class="form-notch-trailing"></div></div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" asp-action="CreateTopic" class="btn btn-primary">Add</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+}
+
+
+<div>
+	<!-- Topics -->
+	@foreach (var sectionItem in Model.Topics)
+	{
+		@Html.DisplayFor(m => sectionItem, "ForumTopic")
+	}
+</div>
