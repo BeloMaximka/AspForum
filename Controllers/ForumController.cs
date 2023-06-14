@@ -59,12 +59,31 @@ namespace AspForum.Controllers
 		}
 		public async Task<IActionResult> Topic([FromRoute] Guid id)
 		{
-			var topic = await _context.Topics.Include(p => p.Author).FirstAsync(t => t.Id == id);
-			if (topic != null)
+			Topic? topic = await _context.Topics.Include(p => p.Author).FirstOrDefaultAsync(t => t.Id == id);
+			if(topic == null)
 			{
-				return View(topic);
+				return RedirectToAction("PageNotFound", "Home");
 			}
-			return RedirectToAction("PageNotFound", "Home");
+			TopicViewModel model = new()
+			{
+				Id = topic.Id,
+				AuthorName = topic.Author.UserName,
+				AuthorAvatarURL = topic.Author.AvatarUrl,
+				Title = topic.Title,
+				Description = topic.Description,
+				CreationDateString = topic.CreatedDt.ToShortDateString(),
+				Posts = await _context.Posts
+								.Where(p => p.TopicId == topic.Id)
+								.Include(p => p.Author)
+								.Select(p => new PostViewModel()
+								{
+									AuthorName = p.Author.UserName,
+									AuthorAvatarURL = p.Author.AvatarUrl,
+									Content = p.Content,
+									CreationDateString = p.CreatedDt.ToShortDateString()
+								}).ToListAsync()
+			};
+			return View(model);
 		}
 
 		[HttpPost]
@@ -138,5 +157,31 @@ namespace AspForum.Controllers
 			}
 			return RedirectToAction("Index");
 		}
+
+		[HttpPost]
+		public async Task<IActionResult> CreatePost(PostFormViewModel model)
+		{
+			if (ModelState.IsValid && User.Identity is not null && User.Identity.IsAuthenticated)
+			{
+				_context.Posts.Add(new Post()
+				{
+					TopicId = model.TopicId,
+					AuthorId = (await _userManager.FindByNameAsync(User.Identity.Name)).Id,
+					Content = model.Content,
+					CreatedDt = DateTime.UtcNow
+				});
+				try
+				{
+					await _context.SaveChangesAsync();
+					return RedirectToAction("Topic", new { id = model.TopicId });
+				}
+				catch (Exception e)
+				{
+					_logger.LogError(e.Message);
+				}
+			}
+			return RedirectToAction("Index");
+		}
+
 	}
 }

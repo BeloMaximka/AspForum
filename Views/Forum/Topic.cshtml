@@ -1,9 +1,15 @@
-﻿@model AspForum.Data.Entities.Topic
+﻿@model TopicViewModel
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-	var author = Model.Author;
+	PostViewModel mainPost = new()
+			{
+				AuthorName = Model.AuthorName,
+				AuthorAvatarURL = Model.AuthorAvatarURL,
+				Content = Model.Description,
+				CreationDateString = Model.CreationDateString,
+			};
 }
 
 <div class="card mb-3">
@@ -11,30 +17,31 @@
 		<h2>@Model.Title</h2>
 		<hr />
 		<div class="d-flex align-items-center ">
-			<img src="~/img/@(string.IsNullOrEmpty(author.AvatarUrl) ? "default-avatar.png" : Model.Author.AvatarUrl)" alt="avatar"
-				 title="@author.UserName"
+			<img src="~/img/@(string.IsNullOrEmpty(Model.AuthorAvatarURL) ? "default-avatar.png" : Model.AuthorAvatarURL)" alt="avatar"
+				 title="@Model.AuthorName"
 		 		 style="width: 40px; height: 40px; border-radius: 100%">
 			<div class="mx-3">
-				<div>Author @author.UserName</div>
-				<div>@Model.CreatedDt</div>
+				<div>Author @Model.AuthorName</div>
+				<div>@Model.CreationDateString</div>
 			</div>
 		</div>
 	</div>
 </div>
 
+@Html.DisplayFor(m => mainPost, "ForumPost")
+
+@foreach (var post in Model.Posts)
+{
+	@Html.DisplayFor(m => post, "ForumPost")
+}
+
 <div class="card mb-3">
 	<div class="card-body">
-		<div class="row">
-			<div class="col d-flex align-items-center flex-column">
-				<div>@author.UserName</div>
-				<img src="~/img/@(string.IsNullOrEmpty(author.AvatarUrl) ? "default-avatar.png" : Model.Author.AvatarUrl)" alt="avatar"
-					 class="my-3" title="@author.UserName"
-					 style="aspect-ratio: 1/1; width: 100%; border-radius: 100%">
-			</div>
-			<div class="col-10">
-				<small class="text-muted">Published @Model.CreatedDt</small>
-				<p class="mt-3">@Model.Description</p>
-			</div>
-		</div>
+		<h5 class="d-inline-block">Reply to </h5><h6 class="d-inline-block mx-1">"@Model.Title"</h6>
+		<form id="addPostForm" class="text-center mt-1 needs-validation d-flex justify-content-start flex-column" method="post">
+			<input id="topicId" name="topicid" value="@Model.Id" hidden />
+			<textarea id="replyContent" class="md-textarea form-control mb-3" name="content" rows="3"></textarea>
+			<button type="submit" asp-action="CreatePost" class="btn btn-primary">Post</button>
+		</form>
 	</div>
 </div>
