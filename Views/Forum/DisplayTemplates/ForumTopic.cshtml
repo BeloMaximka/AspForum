@@ -9,6 +9,6 @@
 		<a asp-action="Topic" asp-route-id="@Model.Id">
 			<h4>@Model.Title</h4>
 		</a>
-		Author @Model.AuthorName, @Model.CreationDateString
+		Author <a asp-controller="Account" asp-action="Profile" asp-route-id="@Model.AuthorId">@Model.AuthorName</a>, @Model.CreationDateString
 	</div>
 </div>

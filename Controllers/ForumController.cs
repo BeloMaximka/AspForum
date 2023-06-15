@@ -48,6 +48,7 @@ namespace AspForum.Controllers
 						.Select(t => new TopicViewModel()
 						{
 							Id = t.Id,
+							AuthorId = t.AuthorId.ToString(),
 							Title = t.Title,
 							AuthorName = t.Author.UserName,
 							CreationDateString = t.CreatedDt.ToShortDateString(),
@@ -67,6 +68,7 @@ namespace AspForum.Controllers
 			TopicViewModel model = new()
 			{
 				Id = topic.Id,
+				AuthorId = topic.AuthorId.ToString(),
 				AuthorName = topic.Author.UserName,
 				AuthorAvatarURL = topic.Author.AvatarUrl,
 				Title = topic.Title,
@@ -78,6 +80,7 @@ namespace AspForum.Controllers
 								.Select(p => new PostViewModel()
 								{
 									AuthorName = p.Author.UserName,
+									AuthorId = p.AuthorId.ToString(),
 									AuthorAvatarURL = p.Author.AvatarUrl,
 									Content = p.Content,
 									CreationDateString = p.CreatedDt.ToShortDateString()

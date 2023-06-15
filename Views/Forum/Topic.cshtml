@@ -6,6 +6,7 @@
 	PostViewModel mainPost = new()
 			{
 				AuthorName = Model.AuthorName,
+				AuthorId = Model.AuthorId,
 				AuthorAvatarURL = Model.AuthorAvatarURL,
 				Content = Model.Description,
 				CreationDateString = Model.CreationDateString,
@@ -17,11 +18,11 @@
 		<h2>@Model.Title</h2>
 		<hr />
 		<div class="d-flex align-items-center ">
-			<img src="~/img/@(string.IsNullOrEmpty(Model.AuthorAvatarURL) ? "default-avatar.png" : Model.AuthorAvatarURL)" alt="avatar"
+			<img src="~/img/@(string.IsNullOrEmpty(Model.AuthorAvatarURL) ? "default-avatar.png" : $"avatars/{Model.AuthorAvatarURL}")" alt="avatar"
 				 title="@Model.AuthorName"
 		 		 style="width: 40px; height: 40px; border-radius: 100%">
 			<div class="mx-3">
-				<div>Author @Model.AuthorName</div>
+				<div>Author <a asp-controller="Account" asp-action="Profile" asp-route-id="@Model.AuthorId">@Model.AuthorName</a></div>
 				<div>@Model.CreationDateString</div>
 			</div>
 		</div>
@@ -35,13 +36,16 @@
 	@Html.DisplayFor(m => post, "ForumPost")
 }
 
-<div class="card mb-3">
-	<div class="card-body">
-		<h5 class="d-inline-block">Reply to </h5><h6 class="d-inline-block mx-1">"@Model.Title"</h6>
-		<form id="addPostForm" class="text-center mt-1 needs-validation d-flex justify-content-start flex-column" method="post">
-			<input id="topicId" name="topicid" value="@Model.Id" hidden />
-			<textarea id="replyContent" class="md-textarea form-control mb-3" name="content" rows="3"></textarea>
-			<button type="submit" asp-action="CreatePost" class="btn btn-primary">Post</button>
-		</form>
+@if (User.Identity is not null && User.Identity.IsAuthenticated)
+{
+	<div class="card mb-3">
+		<div class="card-body">
+			<h5 class="d-inline-block">Reply to </h5><h6 class="d-inline-block mx-1">"@Model.Title"</h6>
+			<form id="addPostForm" class="text-center mt-1 needs-validation d-flex justify-content-start flex-column" method="post">
+				<input id="topicId" name="topicid" value="@Model.Id" hidden />
+				<textarea id="replyContent" class="md-textarea form-control mb-3" name="content" rows="3"></textarea>
+				<button type="submit" asp-action="CreatePost" class="btn btn-primary">Post</button>
+			</form>
+		</div>
 	</div>
-</div>
+}

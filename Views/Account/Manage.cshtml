@@ -1,0 +1,26 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@if (User.Identity is not null && User.Identity.IsAuthenticated) 
+{
+	string? userAvatar = Context.User.FindFirst("Avatar")?.Value;
+
+	<div class="row">
+		<div class="col d-flex align-items-center flex-column">
+			<div>@User.Identity.Name</div>
+			<img src="~/img/@(string.IsNullOrEmpty(userAvatar) ? "default-avatar.png" : $"avatars/{userAvatar}")" alt="avatar"
+		class="my-3" title="@User.Identity.Name"
+		style="aspect-ratio: 1/1; width: 100%; border-radius: 100%">
+		</div>
+		<div class="col-10">
+			TODO
+		</div>
+	</div>
+}
+else 
+{
+    <p>You're not authorized.</p>
+}

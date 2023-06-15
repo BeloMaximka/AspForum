@@ -8,30 +8,59 @@ using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Text;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
+using AspForum.Data;
 
 namespace AspForum.Controllers
 {
 	public class AccountController : Controller
 	{
+		private readonly ApplicationContext _context;
 		private readonly UserManager<User> _userManager;
 		private readonly SignInManager<User> _signInManager;
 		private readonly ILogger<AccountController> _logger;
 		private readonly IEmailSender _emailSender;
 
-		public AccountController(UserManager<User> userManager, 
-			SignInManager<User> signInManager, 
-			ILogger<AccountController> logger, 
-			IEmailSender emailSender)
+		public AccountController(UserManager<User> userManager,
+			SignInManager<User> signInManager,
+			ILogger<AccountController> logger,
+			IEmailSender emailSender,
+			ApplicationContext context)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
 			_logger = logger;
 			_emailSender = emailSender;
+			_context = context;
 		}
 
 		public IActionResult Index()
 		{
 			return View();
+		}
+
+		public async Task<IActionResult> Profile([FromRoute] Guid id)
+		{
+			User? user = await _context.Users.FirstOrDefaultAsync(t => t.Id == id);
+			if(user == null)
+			{
+				return RedirectToAction("PageNotFound", "Home");
+			}
+			ProfileViewModel model = new()
+			{
+				UserName = user.UserName,
+				AvatarUrl = user.AvatarUrl,
+			};
+			return View(model);
+		}
+
+		public IActionResult Manage()
+		{
+			if(User.Identity is not null && User.Identity.IsAuthenticated)
+			{
+				return View();
+			}
+			return RedirectToAction("PageNotFound", "Home");
 		}
 
 		public IActionResult SuccessfulRegistration()
@@ -50,6 +79,7 @@ namespace AspForum.Controllers
 
 				if (userResult.Succeeded)
 				{
+					await AddClaims(user);
 					await _signInManager.SignInAsync(user, false);
 					result.Success = true;
 					return result;
@@ -127,21 +157,9 @@ namespace AspForum.Controllers
 					userResult = await _userManager.AddLoginAsync(user, info);
 					if (userResult.Succeeded)
 					{
+						await AddClaims(user);
 						_logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
-						/*
-						var userId = await _userManager.GetUserIdAsync(user);
-						var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-						code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-						var callbackUrl = Url.Page(
-							"/Account/ConfirmEmail",
-							pageHandler: null,
-							values: new { area = "Identity", userId = userId, code = code },
-							protocol: Request.Scheme);
-
-						await _emailSender.SendEmailAsync(user.Email, "Confirm your email",
-							$"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-						*/
 						await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
 						return RedirectToAction("SuccessfulRegistration");
 					}
@@ -160,6 +178,19 @@ namespace AspForum.Controllers
 		{
 			await _signInManager.SignOutAsync();
 			return RedirectToAction("Index", "Home");
+		}
+
+		private async Task<IdentityResult> AddClaims(User user)
+		{
+			List<Claim> claims = new () 
+			{
+				new Claim(ClaimTypes.Sid, user.Id.ToString()),
+			};
+			if(user.AvatarUrl != null)
+			{
+				claims.Add(new Claim("Avatar", user.AvatarUrl));
+			}
+			return await _userManager.AddClaimsAsync(user, claims);
 		}
 	}
 }

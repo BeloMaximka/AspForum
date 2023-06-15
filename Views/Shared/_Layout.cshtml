@@ -32,12 +32,13 @@
 				</div>
 				@if (User?.Identity?.IsAuthenticated == true)
 				{
-					string? userAvatar = Context.User.FindFirst("Avatar")?.Value;
+					string? userAvatar = User.FindFirst("Avatar")?.Value;
+					string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
 					<div>
-						<img src="~/img/@(string.IsNullOrEmpty(userAvatar) ? "default-avatar.png" : userAvatar)" alt="avatar"
+						<img src="~/img/@(string.IsNullOrEmpty(userAvatar) ? "default-avatar.png" : $"avatars/{userAvatar}")" alt="avatar"
 							 title="@User.Identity.Name"
 							 style="width: 40px; height: 40px; border-radius: 100%">
-						<span>@User.Identity.Name</span>
+						<a asp-controller="Account" asp-action="Profile" asp-route-id="@userId">@User.Identity.Name</a>
 						<form method="post" style="display: inline-block" asp-controller="Account" asp-action="Logout">
 							<input class="btn btn-primary" style="margin-left: 8px" type="submit" value="Log Out" />
 						</form>
