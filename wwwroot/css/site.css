@@ -20,3 +20,25 @@ body {
 .card {
     --mdb-card-spacer-y: 1rem;
 }
+
+#avatarImage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#avatarImage img {
+    object-fit: contain;
+}
+
+#avatarImage:hover img {
+    filter: brightness(0.5);
+}
+
+#avatarImage:hover span {
+    opacity: 1 !important;
+}
+
+#avatarImage span {
+    width: 100%;
+}

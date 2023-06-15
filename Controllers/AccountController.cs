@@ -15,6 +15,7 @@ namespace AspForum.Controllers
 {
 	public class AccountController : Controller
 	{
+		private readonly string[] allowedExtensions = { ".png", ".jpeg", ".jpg" };
 		private readonly ApplicationContext _context;
 		private readonly UserManager<User> _userManager;
 		private readonly SignInManager<User> _signInManager;
@@ -191,6 +192,40 @@ namespace AspForum.Controllers
 				claims.Add(new Claim("Avatar", user.AvatarUrl));
 			}
 			return await _userManager.AddClaimsAsync(user, claims);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> UploadAvatar(IFormFile file)
+		{
+			if (User.Identity is not null && User.Identity.IsAuthenticated && file != null)
+			{
+				User? user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+				string? ext = Path.GetExtension(file.FileName);
+				if (user is not null && ext is not null && 
+					file.Length <= 1048576 && allowedExtensions.Any(e => e == ext)) // 1 MB
+				{
+					string shortPath = $"{User.Identity.Name}{ext}";
+					string path = $"wwwroot/img/avatars/{shortPath}";
+
+					System.IO.File.Delete($"wwwroot/img/avatars/{user.AvatarUrl}");
+					using FileStream fs = new(path, FileMode.Create);
+					await file.CopyToAsync(fs);
+
+					user.AvatarUrl = shortPath;
+					await _context.SaveChangesAsync();
+
+					var claims = await _userManager.GetClaimsAsync(user);
+					var avatarClaim = claims.FirstOrDefault(c => c.Type == "Avatar");
+					if (avatarClaim != null)
+					{
+						await _userManager.RemoveClaimAsync(user, avatarClaim);
+					}
+					await _userManager.AddClaimAsync(user, new Claim("Avatar", shortPath));
+					await _userManager.UpdateAsync(user);
+					await _signInManager.RefreshSignInAsync(user);
+				}
+			}
+			return RedirectToAction("Manage");
 		}
 	}
 }

@@ -11,12 +11,37 @@
 	<div class="row">
 		<div class="col d-flex align-items-center flex-column">
 			<div>@User.Identity.Name</div>
-			<img src="~/img/@(string.IsNullOrEmpty(userAvatar) ? "default-avatar.png" : $"avatars/{userAvatar}")" alt="avatar"
-		class="my-3" title="@User.Identity.Name"
-		style="aspect-ratio: 1/1; width: 100%; border-radius: 100%">
+			<div class="w-100 position-relative" id="avatarImage">
+				<img src="~/img/@(string.IsNullOrEmpty(userAvatar) ? "default-avatar.png" : $"avatars/{userAvatar}")" alt="avatar"
+					 class="my-3 w-100" title="@User.Identity.Name"
+					 style="aspect-ratio: 1/1; border-radius: 100%">
+				<span class="position-absolute opacity-0 text-center h3 mx-1">Change avatar</span>
+			</div>
 		</div>
 		<div class="col-10">
 			TODO
+		</div>
+	</div>
+
+
+	<div class="modal fade" id="uploadAvatarModal" tabindex="-1" style="display: none;" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Avatar preview</h5>
+					<button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<img id="avatarPreview" class="w-100" style="aspect-ratio: 1/1; border-radius: 100%">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Close</button>
+					<form id="uploadAvatarForm" method="post" enctype="multipart/form-data">
+						<button asp-action="UploadAvatar" type="submit" class="btn btn-primary">Upload</button>
+					</form>
+					
+				</div>
+			</div>
 		</div>
 	</div>
 }
@@ -24,3 +49,33 @@ else
 {
     <p>You're not authorized.</p>
 }
+
+<script type="text/javascript">
+	
+	document.addEventListener("DOMContentLoaded", () => {
+		const input = document.createElement('input');
+		input.accept = "image/jpeg, image/png, image/jpg";
+		input.type = 'file';
+		input.hidden = true;
+		input.name = "file";
+		document.getElementById("uploadAvatarForm").appendChild(input);
+		const uploadAvatarModal = new mdb.Modal(document.getElementById('uploadAvatarModal'), {});
+
+		input.onchange = e => {
+			var file = e.target.files[0];
+
+			var reader = new FileReader();
+			reader.readAsDataURL(file);
+
+			reader.onload = (readerEvent) => {
+				var content = readerEvent.target.result;
+				document.getElementById("avatarPreview").src = content;
+				uploadAvatarModal.show();
+			};
+		};
+
+		document.getElementById("avatarImage").onclick = () => {
+			input.click();
+		};
+	});
+</script>
