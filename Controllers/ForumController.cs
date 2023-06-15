@@ -60,16 +60,21 @@ namespace AspForum.Controllers
 		}
 		public async Task<IActionResult> Topic([FromRoute] Guid id)
 		{
-			Topic? topic = await _context.Topics.Include(p => p.Author).FirstOrDefaultAsync(t => t.Id == id);
+			Topic? topic = await _context.Topics
+									.Include(p => p.Author)
+									.Include(p => p.Author.Roles)
+									.FirstOrDefaultAsync(t => t.Id == id);
 			if(topic == null)
 			{
 				return RedirectToAction("PageNotFound", "Home");
 			}
+
 			TopicViewModel model = new()
 			{
 				Id = topic.Id,
 				AuthorId = topic.AuthorId.ToString(),
 				AuthorName = topic.Author.UserName,
+				AuthorRole = topic.Author.Roles[0].Name,
 				AuthorAvatarURL = topic.Author.AvatarUrl,
 				Title = topic.Title,
 				Description = topic.Description,
@@ -77,10 +82,12 @@ namespace AspForum.Controllers
 				Posts = await _context.Posts
 								.Where(p => p.TopicId == topic.Id)
 								.Include(p => p.Author)
+								.Include(p => p.Author.Roles)
 								.Select(p => new PostViewModel()
 								{
 									AuthorName = p.Author.UserName,
 									AuthorId = p.AuthorId.ToString(),
+									AuthorRole = p.Author.Roles[0].Name,
 									AuthorAvatarURL = p.Author.AvatarUrl,
 									Content = p.Content,
 									CreationDateString = p.CreatedDt.ToShortDateString()
@@ -92,7 +99,7 @@ namespace AspForum.Controllers
 		[HttpPost]
 		public async Task<IActionResult> CreateSection(SectionFormViewModel model)
 		{
-			if (ModelState.IsValid && User.Identity is not null && User.Identity.IsAuthenticated )
+			if (ModelState.IsValid && User.Identity is not null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
 			{
 				_context.Sections.Add(new Section()
 				{
@@ -113,7 +120,7 @@ namespace AspForum.Controllers
 		[HttpPost]
 		public async Task<IActionResult> CreateTheme(ThemeFormViewModel model)
 		{
-			if (ModelState.IsValid && User.Identity is not null && User.Identity.IsAuthenticated)
+			if (ModelState.IsValid && User.Identity is not null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
 			{
 				_context.Themes.Add(new Theme()
 				{
@@ -136,7 +143,7 @@ namespace AspForum.Controllers
 		[HttpPost]
 		public async Task<IActionResult> CreateTopic(TopicFormViewModel model)
 		{
-			if (ModelState.IsValid && User.Identity is not null && User.Identity.IsAuthenticated)
+			if (ModelState.IsValid && User.Identity is not null && User.Identity.IsAuthenticated && !User.IsInRole("NotConfirmed"))
 			{
 				Guid id = Guid.NewGuid();
 				_context.Topics.Add(new Topic()
@@ -164,7 +171,7 @@ namespace AspForum.Controllers
 		[HttpPost]
 		public async Task<IActionResult> CreatePost(PostFormViewModel model)
 		{
-			if (ModelState.IsValid && User.Identity is not null && User.Identity.IsAuthenticated)
+			if (ModelState.IsValid && User.Identity is not null && User.Identity.IsAuthenticated && !User.IsInRole("NotConfirmed"))
 			{
 				_context.Posts.Add(new Post()
 				{

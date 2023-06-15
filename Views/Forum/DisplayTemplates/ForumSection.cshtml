@@ -11,7 +11,7 @@
 		<div class="d-flex justify-content-between">
 			<div>
 				<h5 class="d-inline-block mt-2">@Model.Title</h5>
-				@if (User.Identity is not null && User.Identity.IsAuthenticated)
+				@if (User.Identity is not null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
 				{
 					<!-- Add theme button -->
 					<button type="button"

@@ -6,6 +6,7 @@
 	PostViewModel mainPost = new()
 			{
 				AuthorName = Model.AuthorName,
+				AuthorRole = Model.AuthorRole,
 				AuthorId = Model.AuthorId,
 				AuthorAvatarURL = Model.AuthorAvatarURL,
 				Content = Model.Description,
@@ -36,7 +37,7 @@
 	@Html.DisplayFor(m => post, "ForumPost")
 }
 
-@if (User.Identity is not null && User.Identity.IsAuthenticated)
+@if (User.Identity is not null && User.Identity.IsAuthenticated && !User.IsInRole("NotConfirmed"))
 {
 	<div class="card mb-3">
 		<div class="card-body">

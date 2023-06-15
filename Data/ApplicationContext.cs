@@ -1,6 +1,9 @@
 ﻿using AspForum.Data.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata;
+using System.Security.Cryptography;
 
 namespace AspForum.Data
 {
@@ -20,6 +23,7 @@ namespace AspForum.Data
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
+
 			modelBuilder.Entity<Rate>()
 				.HasKey(
 				nameof(Rate.ItemId),
@@ -39,6 +43,19 @@ namespace AspForum.Data
 				.HasOne(p => p.Reply)
 				.WithMany()
 				.HasForeignKey(p => p.ReplyId);
+
+			modelBuilder.Entity<User>()
+				.HasMany(e => e.Roles)
+				.WithMany(e => e.Users)
+				.UsingEntity<IdentityUserRole<Guid>>(
+					j => j.HasOne<Role>().WithMany().HasForeignKey(ur => ur.RoleId),
+					j => j.HasOne<User>().WithMany().HasForeignKey(ur => ur.UserId),
+					j =>
+						{
+							j.ToTable("AspNetUserRoles");
+							j.HasKey(ur => new { ur.UserId, ur.RoleId });
+						}
+				);
 		}
 	}
 }

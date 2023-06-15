@@ -13,6 +13,7 @@
 				<img src="~/img/@(string.IsNullOrEmpty(Model.AuthorAvatarURL) ? "default-avatar.png" : $"avatars/{Model.AuthorAvatarURL}")" alt="avatar"
 			  	     class="my-3" title="@Model.AuthorName"
 					 style="aspect-ratio: 1/1; width: 100%; border-radius: 100%">
+				<div>@Model.AuthorRole</div>
 			</div>
 			<div class="col-10">
 				<small class="text-muted">Published @Model.CreationDateString</small>

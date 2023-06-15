@@ -11,6 +11,7 @@
 		<img src="~/img/@(string.IsNullOrEmpty(Model.AvatarUrl) ? "default-avatar.png" : $"avatars/{Model.AvatarUrl}")" alt="avatar"
 			 class="my-3" title="@Model.UserName"
 			 style="aspect-ratio: 1/1; width: 100%; border-radius: 100%">
+		<div class="my-3">@Model.Role</div>
 		@if(User.Identity is not null && User.Identity.Name == Model.UserName)
 		{
 			<a class="btn btn-primary" asp-action="Manage">Manage</a>

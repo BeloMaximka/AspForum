@@ -18,6 +18,7 @@ namespace AspForum.Controllers
 		private readonly string[] allowedExtensions = { ".png", ".jpeg", ".jpg" };
 		private readonly ApplicationContext _context;
 		private readonly UserManager<User> _userManager;
+		private readonly RoleManager<Role> _roleManager;
 		private readonly SignInManager<User> _signInManager;
 		private readonly ILogger<AccountController> _logger;
 		private readonly IEmailSender _emailSender;
@@ -26,13 +27,15 @@ namespace AspForum.Controllers
 			SignInManager<User> signInManager,
 			ILogger<AccountController> logger,
 			IEmailSender emailSender,
-			ApplicationContext context)
+			ApplicationContext context,
+			RoleManager<Role> roleManager)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
 			_logger = logger;
 			_emailSender = emailSender;
 			_context = context;
+			_roleManager = roleManager;
 		}
 
 		public IActionResult Index()
@@ -42,15 +45,17 @@ namespace AspForum.Controllers
 
 		public async Task<IActionResult> Profile([FromRoute] Guid id)
 		{
-			User? user = await _context.Users.FirstOrDefaultAsync(t => t.Id == id);
+			User? user = await _context.Users.Include(u => u.Roles).FirstOrDefaultAsync(t => t.Id == id);
 			if(user == null)
 			{
 				return RedirectToAction("PageNotFound", "Home");
 			}
+
 			ProfileViewModel model = new()
 			{
 				UserName = user.UserName,
 				AvatarUrl = user.AvatarUrl,
+				Role = user.Roles[0].Name
 			};
 			return View(model);
 		}
@@ -80,7 +85,7 @@ namespace AspForum.Controllers
 
 				if (userResult.Succeeded)
 				{
-					await AddClaims(user);
+					await ApplyNewUserInfo(user);
 					await _signInManager.SignInAsync(user, false);
 					result.Success = true;
 					return result;
@@ -158,7 +163,7 @@ namespace AspForum.Controllers
 					userResult = await _userManager.AddLoginAsync(user, info);
 					if (userResult.Succeeded)
 					{
-						await AddClaims(user);
+						await ApplyNewUserInfo(user);
 						_logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
 						await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
@@ -181,7 +186,7 @@ namespace AspForum.Controllers
 			return RedirectToAction("Index", "Home");
 		}
 
-		private async Task<IdentityResult> AddClaims(User user)
+		private async Task ApplyNewUserInfo(User user)
 		{
 			List<Claim> claims = new () 
 			{
@@ -191,7 +196,8 @@ namespace AspForum.Controllers
 			{
 				claims.Add(new Claim("Avatar", user.AvatarUrl));
 			}
-			return await _userManager.AddClaimsAsync(user, claims);
+			await _userManager.AddClaimsAsync(user, claims);
+			await _userManager.AddToRoleAsync(user, "NotConfirmed");
 		}
 
 		[HttpPost]
@@ -204,25 +210,37 @@ namespace AspForum.Controllers
 				if (user is not null && ext is not null && 
 					file.Length <= 1048576 && allowedExtensions.Any(e => e == ext)) // 1 MB
 				{
-					string shortPath = $"{User.Identity.Name}{ext}";
-					string path = $"wwwroot/img/avatars/{shortPath}";
-
-					System.IO.File.Delete($"wwwroot/img/avatars/{user.AvatarUrl}");
-					using FileStream fs = new(path, FileMode.Create);
-					await file.CopyToAsync(fs);
-
-					user.AvatarUrl = shortPath;
-					await _context.SaveChangesAsync();
-
-					var claims = await _userManager.GetClaimsAsync(user);
-					var avatarClaim = claims.FirstOrDefault(c => c.Type == "Avatar");
-					if (avatarClaim != null)
+					try
 					{
-						await _userManager.RemoveClaimAsync(user, avatarClaim);
+						string shortPath = $"{User.Identity.Name}{ext}";
+						string path = $"wwwroot/img/avatars/{shortPath}";
+
+						string oldPath = $"wwwroot/img/avatars/{user.AvatarUrl}";
+						if (user.AvatarUrl is not null && System.IO.File.Exists(oldPath))
+						{
+							System.IO.File.Delete(oldPath);
+						}
+
+						using FileStream fs = new(path, FileMode.Create);
+						await file.CopyToAsync(fs);
+
+						user.AvatarUrl = shortPath;
+						await _context.SaveChangesAsync();
+
+						var claims = await _userManager.GetClaimsAsync(user);
+						var avatarClaim = claims.FirstOrDefault(c => c.Type == "Avatar");
+						if (avatarClaim != null)
+						{
+							await _userManager.RemoveClaimAsync(user, avatarClaim);
+						}
+						await _userManager.AddClaimAsync(user, new Claim("Avatar", shortPath));
+						await _userManager.UpdateAsync(user);
+						await _signInManager.RefreshSignInAsync(user);
 					}
-					await _userManager.AddClaimAsync(user, new Claim("Avatar", shortPath));
-					await _userManager.UpdateAsync(user);
-					await _signInManager.RefreshSignInAsync(user);
+					catch (Exception e)
+					{
+						_logger.LogError(e.Message);
+					}
 				}
 			}
 			return RedirectToAction("Manage");
