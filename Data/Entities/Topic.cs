@@ -10,5 +10,7 @@
 		public DateTime CreatedDt { get; set; }
 		public DateTime? DeletedDt { get; set; }
 		public User Author { get; set; } = null!;
+
+		public List<Rate> Rates { get; set; } = null!;
 	}
 }

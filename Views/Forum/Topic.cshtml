@@ -5,12 +5,16 @@
 @{
 	PostViewModel mainPost = new()
 			{
+				Id = Model.Id.ToString(),
 				AuthorName = Model.AuthorName,
 				AuthorRole = Model.AuthorRole,
 				AuthorId = Model.AuthorId,
 				AuthorAvatarURL = Model.AuthorAvatarURL,
 				Content = Model.Description,
 				CreationDateString = Model.CreationDateString,
+				Likes = Model.Likes,
+				Dislikes = Model.Dislikes,
+				UserRating = Model.UserRating
 			};
 }
 
@@ -49,4 +53,68 @@
 			</form>
 		</div>
 	</div>
+}
+
+@if(User.Identity is not null && User.Identity.IsAuthenticated)
+{
+	<script>
+		for (let elem of document.querySelectorAll("[rating-item-id]")) {
+			elem.addEventListener('click', ratingClick);
+		}
+		function ratingClick(e) {
+
+			const data = {
+				"type": "Post",
+				"itemId": e.currentTarget.getAttribute("rating-item-id"),
+				"rating": e.currentTarget.getAttribute("rating-value"),
+			}
+
+			const icon = e.currentTarget.getElementsByClassName("rate-icon")[0];
+			const count = e.currentTarget.getElementsByClassName("rate-count")[0];
+
+			const oppositeParent = e.currentTarget.parentElement.querySelector(`[rating-value="${data.rating * -1}"]`);
+			const oppositeIcon = oppositeParent.getElementsByClassName("rate-icon")[0];
+			const oppositeCount = oppositeParent.getElementsByClassName("rate-count")[0];
+
+			const method = icon.classList.contains('fas') ? "DELETE" : "POST";
+
+			fetch("/api/rate", {
+				method: method,
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(data),
+			})
+				.then(r => {
+					if (r.status >= 200 && r.status < 300) {
+						if (method === "POST") {
+							if (r.status === 201) {
+								icon.classList.remove("far");
+								icon.classList.add("fas");
+								count.innerText = Number(count.innerText) + 1;
+							}
+							else if (r.status === 200) {
+								icon.classList.remove("far");
+								icon.classList.add("fas");
+								count.innerText = Number(count.innerText) + 1;
+
+								oppositeIcon.classList.remove("fas");
+								oppositeIcon.classList.add("far");
+								oppositeCount.innerText = Number(count.innerText) - 1;
+							}
+						}
+						else {
+							if(r.status === 202) {
+								icon.classList.remove("fas");
+								icon.classList.add("far");
+								count.innerText = Number(count.innerText) - 1;
+							}
+						}
+					}
+					else {
+						r.text().then((error) => console.log(error));
+					}
+				})
+		}
+	</script>
 }

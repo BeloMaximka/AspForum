@@ -44,6 +44,16 @@ namespace AspForum.Data
 				.WithMany()
 				.HasForeignKey(p => p.ReplyId);
 
+			modelBuilder.Entity<Post>()
+			   .HasMany(t => t.Rates)
+			   .WithOne()
+			   .HasForeignKey(r => r.ItemId);
+
+			modelBuilder.Entity<Topic>()
+			   .HasMany(t => t.Rates)
+			   .WithOne()
+			   .HasForeignKey(r => r.ItemId);
+
 			modelBuilder.Entity<User>()
 				.HasMany(e => e.Roles)
 				.WithMany(e => e.Users)

@@ -62,11 +62,19 @@ namespace AspForum.Controllers
 		{
 			Topic? topic = await _context.Topics
 									.Include(p => p.Author)
+									.Include(p => p.Rates)
 									.Include(p => p.Author.Roles)
 									.FirstOrDefaultAsync(t => t.Id == id);
 			if(topic == null)
 			{
 				return RedirectToAction("PageNotFound", "Home");
+			}
+
+			Guid? userId = null;
+			if(User.Identity is not null && User.Identity.IsAuthenticated &&
+				await _userManager.FindByNameAsync(User.Identity.Name) is User user)
+			{
+				userId = user.Id;
 			}
 
 			TopicViewModel model = new()
@@ -79,18 +87,25 @@ namespace AspForum.Controllers
 				Title = topic.Title,
 				Description = topic.Description,
 				CreationDateString = topic.CreatedDt.ToShortDateString(),
+				Likes = topic.Rates.Count(r => r.Rating > 0),
+				Dislikes = topic.Rates.Count(r => r.Rating < 0),
+				UserRating = userId == null ? null : topic.Rates.FirstOrDefault(r => r.UserId == userId).Rating,
 				Posts = await _context.Posts
 								.Where(p => p.TopicId == topic.Id)
 								.Include(p => p.Author)
 								.Include(p => p.Author.Roles)
 								.Select(p => new PostViewModel()
 								{
+									Id = p.Id.ToString(),
 									AuthorName = p.Author.UserName,
 									AuthorId = p.AuthorId.ToString(),
 									AuthorRole = p.Author.Roles[0].Name,
 									AuthorAvatarURL = p.Author.AvatarUrl,
 									Content = p.Content,
-									CreationDateString = p.CreatedDt.ToShortDateString()
+									CreationDateString = p.CreatedDt.ToShortDateString(),
+									Likes = p.Rates.Count(r => r.Rating > 0),
+									Dislikes = p.Rates.Count(r => r.Rating < 0),
+									UserRating = userId == null ? null : p.Rates.FirstOrDefault(r => r.UserId == userId).Rating
 								}).ToListAsync()
 			};
 			return View(model);

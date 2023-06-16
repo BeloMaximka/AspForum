@@ -209,7 +209,7 @@
 				const email = registerEmailInput.value;
 				const isAgree = isAgreeInput.checked;
 
-				fetch("Account/Register", {
+				fetch("/Account/Register", {
 					body: `Username=${username}&Email=${email}&Password=${password}&PasswordConfirm=${passwordConfirm}&IsAgree=${isAgree}`,
 					headers: {
 						"Content-Type": "application/x-www-form-urlencoded",
@@ -248,7 +248,7 @@
 			const password = loginPasswordInput.value;
 			const rememberMe = loginRememberMe.checked;
 
-			fetch("Account/Login", {
+			fetch("/Account/Login", {
 				body: `Username=${username}&Password=${password}&RememberMe=${rememberMe}&__RequestVerificationToken=${antiForgeryToken}`,
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
