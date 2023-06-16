@@ -56,7 +56,9 @@ namespace AspForum.Controllers
 
         public async Task<IActionResult> Profile([FromRoute] Guid id)
         {
-            User? user = await _context.Users.Include(u => u.Roles).FirstOrDefaultAsync(t => t.Id == id);
+            User? user = await _context.Users
+                            .Include(u => u.Roles)
+							.FirstOrDefaultAsync(t => t.Id == id);
             if (user == null)
             {
                 return RedirectToAction("PageNotFound", "Home");
@@ -66,7 +68,16 @@ namespace AspForum.Controllers
             {
                 UserName = user.UserName,
                 AvatarUrl = user.AvatarUrl,
-                Role = user.Roles[0].Name
+                Role = user.Roles[0].Name,
+                RecentPosts = await _context.Posts
+                                .Where(p => p.AuthorId == user.Id)
+                                .Select(p => new Models.Forum.ProfileRecentPostViewModel()
+                                {
+                                    Content = p.Content,
+                                    CreationDateString = p.CreatedDt.ToShortDateString(),
+                                    TopicTitle = p.Topic.Title,
+                                    TopicId = p.TopicId.ToString()
+                                }).ToListAsync()
             };
             return View(model);
         }

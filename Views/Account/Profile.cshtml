@@ -18,6 +18,14 @@
 		}
 	</div>
 	<div class="col-10">
-		TODO
+		<h3>Recent posts:</h3>
+		@if(Model.RecentPosts.Count == 0)
+		{
+			<p>Nothing yet.</p>
+		}
+		@foreach (var post in Model.RecentPosts)
+		{
+			@Html.DisplayFor(m => post, "RecentPost")
+		}
 	</div>
 </div>

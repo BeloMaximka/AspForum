@@ -9,8 +9,10 @@
 		public string Content { get; set; } = null!;
 		public DateTime CreatedDt { get; set; }
 		public DateTime? DeletedDt { get; set; }
+
 		public User Author { get; set; } = null!;
 		public Post? Reply { get; set; } = null!;
 		public List<Rate> Rates { get; set; } = null!;
+		public Topic Topic { get; set; } = null!;
 	}
 }

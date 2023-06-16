@@ -66,3 +66,10 @@
 		@Html.DisplayFor(m => sectionItem, "ForumTopic")
 	}
 </div>
+
+@if(Model.Topics.Count == 0)
+{
+	<p class="display-6 my-3">
+		There's no topics yet. Be first to create one!
+	</p>
+}
