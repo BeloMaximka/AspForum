@@ -89,7 +89,7 @@ namespace AspForum.Controllers
 				CreationDateString = topic.CreatedDt.ToShortDateString(),
 				Likes = topic.Rates.Count(r => r.Rating > 0),
 				Dislikes = topic.Rates.Count(r => r.Rating < 0),
-				UserRating = userId == null ? null : topic.Rates.FirstOrDefault(r => r.UserId == userId).Rating,
+				UserRating = userId == null ? null : topic.Rates.FirstOrDefault(r => r.UserId == userId && r.ItemId == topic.Id)?.Rating,
 				Posts = await _context.Posts
 								.Where(p => p.TopicId == topic.Id)
 								.Include(p => p.Author)
@@ -105,7 +105,7 @@ namespace AspForum.Controllers
 									CreationDateString = p.CreatedDt.ToShortDateString(),
 									Likes = p.Rates.Count(r => r.Rating > 0),
 									Dislikes = p.Rates.Count(r => r.Rating < 0),
-									UserRating = userId == null ? null : p.Rates.FirstOrDefault(r => r.UserId == userId).Rating
+									UserRating = userId == null ? null : (p.Rates.FirstOrDefault(r => r.UserId == userId && r.ItemId == p.Id) == null ? null : p.Rates.FirstOrDefault(r => r.UserId == userId && r.ItemId == p.Id)!.Rating)
 								}).ToListAsync()
 			};
 			return View(model);

@@ -15,10 +15,10 @@
 				<!-- Pills navs -->
 				<ul class="nav nav-pills nav-justified mb-3" role="tablist">
 					<li class="nav-item" role="presentation">
-						<a class="nav-link" data-mdb-toggle="pill" href="#navbarLogin-login" role="tab" aria-selected="true">Login</a>
+						<a class="nav-link active show" data-mdb-toggle="pill" href="#navbarLogin-login" role="tab" aria-selected="false" tabindex="-1">Login</a>
 					</li>
 					<li class="nav-item" role="presentation">
-						<a class="nav-link active show" data-mdb-toggle="pill" href="#navbarLogin-signup" role="tab" aria-selected="false" tabindex="-1">Register</a>
+						<a class="nav-link" data-mdb-toggle="pill" href="#navbarLogin-signup" role="tab" aria-selected="true">Register</a>
 					</li>
 				</ul>
 
@@ -26,7 +26,7 @@
 				<div class="tab-content">
 
 					<!--Login Panel-->
-					<div class="tab-pane fade" id="navbarLogin-login" role="tabpanel">
+					<div class="tab-pane fade in show active" id="navbarLogin-login" role="tabpanel">
 
 						<p class="status"></p>
 
@@ -35,11 +35,17 @@
 								<div>Connect with:</div>
 								<div class="d-flex gap-1  justify-content-center">
 
-									<a rel="nofollow" href="" title="Connect with Facebook" class="btn btn-primary btn-floating mx-1 ripple-surface" data-provider="Facebook" role="button" style="min-width: 37px;"><i class="fab fa-facebook-f"></i></a>
+									<!--
+											<a rel="nofollow" href="" title="Connect with Facebook" class="btn btn-primary btn-floating mx-1 ripple-surface" data-provider="Facebook" role="button" style="min-width: 37px;"><i class="fab fa-facebook-f"></i></a>
+									-->
 									<form method="post" asp-controller="Account" asp-action="ExternalLogin">
-										<button type="submit" class="btn btn-primary btn-floating mx-1" title="Connect with Google" name="provider" value="Google"><i class="fab fa-google"></i></button>
+										<button asp-controller="Account" asp-action="ExternalLogin" 
+											type="submit" class="btn btn-primary btn-floating mx-1" title="Connect with Google" name="provider" value="Google"><i class="fab fa-google"></i></button>
 									</form>
-									<a rel="nofollow" href="" title="Connect with Twitter" class="btn btn-primary btn-floating mx-1" data-provider="Twitter" role="button"><i class="fab fa-twitter"></i></a>
+									<!--
+											<a rel="nofollow" href="" title="Connect with Twitter" class="btn btn-primary btn-floating mx-1" data-provider="Twitter" role="button"><i class="fab fa-twitter"></i></a>
+									-->
+									
 								</div>
 							</div>
 						</div>
@@ -76,18 +82,13 @@
 
 							<div id="loginFeedback" class="text-danger"></div>
 
-							<!-- Register buttons -->
-							<div class="text-center">
-								<p>Not a member? <a href="#" class="auth-modal-toggle" data-auth-modal-tab="sign-up">Register</a></p>
-							</div>
-
 						</form>
 						<!-- Default form login -->
 
 					</div>
 					<!--/.Login Panel-->
 					<!--Registration Panel -->
-					<div class="tab-pane fade in show active" id="navbarLogin-signup" role="tabpanel">
+					<div class="tab-pane fade" id="navbarLogin-signup" role="tabpanel">
 
 						<!-- Default form register  -->
 						<form id="registerForm" class="text-center needs-validation" method="post" asp-controller="Account" asp-action="Register">
@@ -100,9 +101,17 @@
 								<div class="wp-social-login-widget">
 									<div class="wp-social-login-connect-with">Connect with:</div>
 									<div class="wp-social-login-provider-list">
-										<a rel="nofollow" href="" title="Connect with Facebook" class="btn btn-primary btn-floating mx-1 ripple-surface" data-provider="Facebook" role="button" style="min-width: 37px;"><i class="fab fa-facebook-f"></i></a>
-										<a rel="nofollow" href="" title="Connect with Google" class="btn btn-primary btn-floating mx-1" data-provider="Google" role="button"><i class="fab fa-google"></i></a>
-										<a rel="nofollow" href="" title="Connect with Twitter" class="btn btn-primary btn-floating mx-1" data-provider="Twitter" role="button"><i class="fab fa-twitter"></i></a>
+										<!--
+											<a rel="nofollow" href="" title="Connect with Facebook" class="btn btn-primary btn-floating mx-1 ripple-surface" data-provider="Facebook" role="button" style="min-width: 37px;"><i class="fab fa-facebook-f"></i></a>
+										-->
+										<form method="post" asp-controller="Account" asp-action="ExternalLogin">
+											<button asp-controller="Account" asp-action="ExternalLogin" 
+												type="submit" class="btn btn-primary btn-floating mx-1" title="Connect with Google" name="provider" value="Google"><i class="fab fa-google"></i></button>
+										</form>
+										<!--
+											<a rel="nofollow" href="" title="Connect with Twitter" class="btn btn-primary btn-floating mx-1" data-provider="Twitter" role="button"><i class="fab fa-twitter"></i></a>
+										-->
+										
 									</div>
 								</div>
 							</div>

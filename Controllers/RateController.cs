@@ -104,7 +104,7 @@ namespace AspForum.Controllers
 				return "Invalid type";
 			}
 
-			if (!_context.Posts.Any(p => p.Id == data.ItemId))
+			if (!_context.Posts.Any(p => p.Id == data.ItemId) && !_context.Topics.Any(p => p.Id == data.ItemId)) // TODO need better implementation
 			{
 				HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
 				return "Invalid ItemId";
