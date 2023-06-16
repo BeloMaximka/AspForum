@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using AspForum.Data;
 using AspForum.Services.Email;
 using Microsoft.AspNetCore.Authorization;
+using AspForum.Models.Account;
 
 namespace AspForum.Controllers
 {
@@ -25,7 +26,8 @@ namespace AspForum.Controllers
 		private readonly ILogger<AccountController> _logger;
 		private readonly IEmailService _emailService;
 
-		public AccountController(UserManager<User> userManager,
+		public AccountController(
+            UserManager<User> userManager,
 			SignInManager<User> signInManager,
 			ILogger<AccountController> logger,
 			IEmailSender emailSender,
@@ -41,10 +43,11 @@ namespace AspForum.Controllers
 			_emailService = emailService;
 		}
 
-		public IActionResult Index()
-		{
-			return View();
-		}
+        #region Pages
+        public IActionResult Index()
+        {
+            return View();
+        }
 
         public IActionResult EmailConfirmed()
         {
@@ -52,149 +55,152 @@ namespace AspForum.Controllers
         }
 
         public async Task<IActionResult> Profile([FromRoute] Guid id)
-		{
-			User? user = await _context.Users.Include(u => u.Roles).FirstOrDefaultAsync(t => t.Id == id);
-			if(user == null)
-			{
-				return RedirectToAction("PageNotFound", "Home");
-			}
+        {
+            User? user = await _context.Users.Include(u => u.Roles).FirstOrDefaultAsync(t => t.Id == id);
+            if (user == null)
+            {
+                return RedirectToAction("PageNotFound", "Home");
+            }
 
-			ProfileViewModel model = new()
-			{
-				UserName = user.UserName,
-				AvatarUrl = user.AvatarUrl,
-				Role = user.Roles[0].Name
-			};
-			return View(model);
-		}
+            ProfileViewModel model = new()
+            {
+                UserName = user.UserName,
+                AvatarUrl = user.AvatarUrl,
+                Role = user.Roles[0].Name
+            };
+            return View(model);
+        }
 
-		public IActionResult Manage()
-		{
-			if(User.Identity is not null && User.Identity.IsAuthenticated)
-			{
-				return View();
-			}
-			return RedirectToAction("PageNotFound", "Home");
-		}
+        public IActionResult Manage()
+        {
+            if (User.Identity is not null && User.Identity.IsAuthenticated)
+            {
+                return View();
+            }
+            return RedirectToAction("PageNotFound", "Home");
+        }
 
-		public IActionResult SuccessfulRegistration()
-		{
-			return View();
-		}
+        public IActionResult SuccessfulRegistration()
+        {
+            return View();
+        }
+        #endregion
 
-		[HttpPost]
-		public async Task<RegistrationResult> Register(RegisterViewModel model)
-		{
-			RegistrationResult result = new();
-			if (ModelState.IsValid && model.IsAgree)
-			{
-				User user = new User { Email = model.Email, UserName = model.Username, };
-				var userResult = await _userManager.CreateAsync(user, model.Password);
+        #region ResitrationLoginLogout
+        [HttpPost]
+        public async Task<ResultWithManyErrorMessages> Register(RegisterViewModel model)
+        {
+            ResultWithManyErrorMessages result = new();
+            if (ModelState.IsValid && model.IsAgree)
+            {
+                User user = new User { Email = model.Email, UserName = model.Username, };
+                var userResult = await _userManager.CreateAsync(user, model.Password);
 
-				if (userResult.Succeeded)
-				{
-					await FinishRegistration(user);
-					await _signInManager.SignInAsync(user, false);
-					result.Success = true;
-					return result;
-				}
-				foreach (var error in userResult.Errors)
-				{
-					result.Errors.Add(error.Description);
-				}
-			}
-			return result;
-		}
+                if (userResult.Succeeded)
+                {
+                    await FinishRegistration(user);
+                    await _signInManager.SignInAsync(user, false);
+                    result.Success = true;
+                    return result;
+                }
+                foreach (var error in userResult.Errors)
+                {
+                    result.Errors.Add(error.Description);
+                }
+            }
+            return result;
+        }
 
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<LoginResult> Login(LoginViewModel model)
-		{
-			LoginResult response = new();
-			if (ModelState.IsValid)
-			{
-				var result =
-					await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, false);
-				if (result.Succeeded)
-				{
-					response.Success = true;
-				}
-				else
-				{
-					response.Message = "Incorrect username or password";
-				}
-			}
-			return response;
-		}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<LoginResult> Login(LoginViewModel model)
+        {
+            LoginResult response = new();
+            if (ModelState.IsValid)
+            {
+                var result =
+                    await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, false);
+                if (result.Succeeded)
+                {
+                    response.Success = true;
+                }
+                else
+                {
+                    response.Message = "Incorrect username or password";
+                }
+            }
+            return response;
+        }
 
-		[HttpPost]
-		public IActionResult ExternalLogin(string provider, string? returnUrl)
-		{
-			returnUrl = "/";
-			var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, $"/Account/ExternalLoginRedirect?returnUrl=%2F");
-			return new ChallengeResult(provider, properties);
-		}
+        [HttpPost]
+        public IActionResult ExternalLogin(string provider, string? returnUrl)
+        {
+            returnUrl = "/";
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, $"/Account/ExternalLoginRedirect?returnUrl=%2F");
+            return new ChallengeResult(provider, properties);
+        }
 
-		[HttpGet]
-		public async Task<IActionResult> ExternalLoginRedirect(string? returnUrl, string? remoteError)
-		{
-			returnUrl = returnUrl ?? Url.Content("~/");
-			if (remoteError != null)
-			{
-				//ErrorMessage = $"Error from external provider: {remoteError}";
-				return LocalRedirect(returnUrl);
-			}
-			var info = await _signInManager.GetExternalLoginInfoAsync();
-			if (info == null || info.Principal.Identity is null)
-			{
-				//ErrorMessage = "Error loading external login information.";
-				return LocalRedirect(returnUrl);
-			}
+        [HttpGet]
+        public async Task<IActionResult> ExternalLoginRedirect(string? returnUrl, string? remoteError)
+        {
+            returnUrl = returnUrl ?? Url.Content("~/");
+            if (remoteError != null)
+            {
+                //ErrorMessage = $"Error from external provider: {remoteError}";
+                return LocalRedirect(returnUrl);
+            }
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null || info.Principal.Identity is null)
+            {
+                //ErrorMessage = "Error loading external login information.";
+                return LocalRedirect(returnUrl);
+            }
 
-			// Sign in the user with this external login provider if the user already has a login.
-			var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
-			if (result.Succeeded)
-			{
-				_logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
-				return LocalRedirect(returnUrl);
-			}
-			if (result.IsLockedOut)
-			{
-				return LocalRedirect(returnUrl);
-			}
-			else
-			{
-				User user = new User { Email = info.Principal.Claims.First(c => c.Type == ClaimTypes.Email).Value, UserName = info.Principal.Identity.Name, };
-				var userResult = await _userManager.CreateAsync(user);
-				if (userResult.Succeeded)
-				{
-					userResult = await _userManager.AddLoginAsync(user, info);
-					if (userResult.Succeeded)
-					{
-						await FinishRegistration(user);
-						_logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+            // Sign in the user with this external login provider if the user already has a login.
+            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
+                return LocalRedirect(returnUrl);
+            }
+            if (result.IsLockedOut)
+            {
+                return LocalRedirect(returnUrl);
+            }
+            else
+            {
+                User user = new User { Email = info.Principal.Claims.First(c => c.Type == ClaimTypes.Email).Value, UserName = info.Principal.Identity.Name, };
+                var userResult = await _userManager.CreateAsync(user);
+                if (userResult.Succeeded)
+                {
+                    userResult = await _userManager.AddLoginAsync(user, info);
+                    if (userResult.Succeeded)
+                    {
+                        await FinishRegistration(user);
+                        _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
-						await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
-						return RedirectToAction("SuccessfulRegistration");
-					}
-				}
-				foreach (var error in userResult.Errors)
-				{
-					ModelState.AddModelError(string.Empty, error.Description);
-				}
-			}
-			return LocalRedirect(returnUrl);
-		}
+                        await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+                        return RedirectToAction("SuccessfulRegistration");
+                    }
+                }
+                foreach (var error in userResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+            return LocalRedirect(returnUrl);
+        }
 
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Logout()
-		{
-			await _signInManager.SignOutAsync();
-			return RedirectToAction("Index", "Home");
-		}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+        #endregion
 
-		[HttpGet]
+        [HttpGet]
 		[AllowAnonymous]
 		public async Task<IActionResult> ConfirmEmail(string userId, string code)
 		{
@@ -222,38 +228,45 @@ namespace AspForum.Controllers
 			}
 		}
 
-		private async Task FinishRegistration(User user)
-		{
-			List<Claim> claims = new () 
-			{
-				new Claim(ClaimTypes.Sid, user.Id.ToString()),
-			};
-			if(user.AvatarUrl != null)
-			{
-				claims.Add(new Claim("Avatar", user.AvatarUrl));
-			}
-			await _userManager.AddClaimsAsync(user, claims);
-			await _userManager.AddToRoleAsync(user, "NotConfirmed");
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ResultWithManyErrorMessages> ChangePassword(ChangePasswordFormViewModel model)
+        {
+            ResultWithManyErrorMessages result = new();
+            if(!ModelState.IsValid)
+            {
+                result.Errors.Add("All field are required");
+                return result;
+            }
+            if (User.Identity is not null && User.Identity.IsAuthenticated &&
+                await _userManager.FindByNameAsync(User.Identity.Name) is User user)
+            {
+                // Verify new passwords match
+                if(model.NewPassword != model.NewPasswordRepeat)
+                {
+                    result.Errors.Add("New password mismatch");
+                    return result;
+                }
 
-			// Email confirmation
-			var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-			var callbackUrl = Url.Action(
-				"ConfirmEmail",
-				"Account",
-				new { userId = user.Id, code = code },
-				protocol: HttpContext.Request.Scheme);
-			if(callbackUrl == null)
-			{
-				return; // TODO ERROR HANDLING
-			}
-			Models.EmailTemplates.ConfirmEmailModel model = new()
-			{
-				Email = user.Email,
-				UserName = user.UserName,
-				ConfirmLink = callbackUrl
-			};
-			await _emailService.SendAsync("ConfirmEmail", model);
-		}
+                // Try to change password
+                var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+                if (!changePasswordResult.Succeeded)
+                {
+                    foreach (var error in changePasswordResult.Errors)
+                    {
+                        result.Errors.Add(error.Description);
+                    }
+                    return result;
+                }
+
+                result.Success = true;
+            }
+            else
+            {
+                result.Errors.Add("Not authorized.");
+            }
+            return result;
+        }
 
 		[HttpPost]
 		public async Task<IActionResult> UploadAvatar(IFormFile file)
@@ -300,5 +313,38 @@ namespace AspForum.Controllers
 			}
 			return RedirectToAction("Manage");
 		}
-	}
+
+        private async Task FinishRegistration(User user)
+        {
+            List<Claim> claims = new()
+            {
+                new Claim(ClaimTypes.Sid, user.Id.ToString()),
+            };
+            if (user.AvatarUrl != null)
+            {
+                claims.Add(new Claim("Avatar", user.AvatarUrl));
+            }
+            await _userManager.AddClaimsAsync(user, claims);
+            await _userManager.AddToRoleAsync(user, "NotConfirmed");
+
+            // Email confirmation
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var callbackUrl = Url.Action(
+                "ConfirmEmail",
+                "Account",
+                new { userId = user.Id, code = code },
+                protocol: HttpContext.Request.Scheme);
+            if (callbackUrl == null)
+            {
+                return; // TODO ERROR HANDLING
+            }
+            Models.EmailTemplates.ConfirmEmailModel model = new()
+            {
+                Email = user.Email,
+                UserName = user.UserName,
+                ConfirmLink = callbackUrl
+            };
+            await _emailService.SendAsync("ConfirmEmail", model);
+        }
+    }
 }

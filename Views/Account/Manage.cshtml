@@ -19,7 +19,39 @@
 			</div>
 		</div>
 		<div class="col-10">
-			TODO
+			<h3 class="mb-3">Change password</h3>
+			<form id="changePasswordForm" class="text-center needs-validation" method="post">
+				<!-- Old password input -->
+				<div class="form-outline form-auth-mdb mb-4">
+					<input type="password" id="changePasswordOld" class="form-control" autocomplete="off" required="" minlength="5">
+					<label class="form-label" style="margin-left: 0px;">Your current password</label>
+					<div class="invalid-feedback">Please provide a valid password.</div>
+					<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
+				</div>
+
+				<!-- New password input -->
+				<div class="form-outline form-auth-mdb mb-4">
+					<input type="password" id="changePasswordNew" class="form-control" autocomplete="off" required="" minlength="5">
+					<label class="form-label" style="margin-left: 0px;">Your new password</label>
+					<div class="invalid-feedback">Please provide a valid password.</div>
+					<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
+				</div>
+
+				<!-- Repeat new password input -->
+				<div class="form-outline form-auth-mdb mb-4">
+					<input type="password" id="changePasswordNewRepeat" class="form-control" autocomplete="off" required="" minlength="5">
+					<label class="form-label" style="margin-left: 0px;">Repeat your new password</label>
+					<div asp-validation-for="PasswordConfirm" class="invalid-feedback">Password mismatch.</div>
+					<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
+				</div>
+
+				<button class="btn btn-primary btn-block mb-3" id="changePasswordBtn" type="button">
+					Change password
+				</button>
+
+				<div id="changePasswordFeedback" class="text-danger"></div>
+			</form>
+			<hr class="my-4">
 		</div>
 	</div>
 
@@ -77,5 +109,67 @@ else
 		document.getElementById("avatarImage").onclick = () => {
 			input.click();
 		};
+
+		// Change password
+		const antiForgeryToken = document.querySelectorAll('input[name=__RequestVerificationToken]')[0].value;
+		const changePasswordForm = document.getElementById("changePasswordForm");
+		const changePasswordBtn = document.getElementById("changePasswordBtn");
+		const changePasswordOldInput = document.getElementById("changePasswordOld");
+		const changePasswordNewInput = document.getElementById("changePasswordNew");
+		const changePasswordNewRepeatInput = document.getElementById("changePasswordNewRepeat");
+		const changePasswordFeedback = document.getElementById("changePasswordFeedback");
+
+		changePasswordBtn.addEventListener("click", () => {
+			changePasswordForm.classList.add("was-validated");
+			changePasswordFeedback.innerText = "";
+
+			// Password match validation
+			const password = changePasswordNewInput.value;
+			const passwordConfirm = changePasswordNewRepeatInput.value;
+			if (password !== passwordConfirm) {
+				changePasswordNewRepeatInput.classList.add("is-invalid");
+				return;
+			}
+			else {
+				changePasswordNewRepeatInput.classList.remove("is-invalid");
+			}
+
+			if (changePasswordForm.checkValidity()) {
+				const oldPassword = changePasswordOldInput.value;
+				const passwordNew = changePasswordNewInput.value;
+				const passwordNewRepeat = changePasswordNewRepeatInput.value;
+
+				fetch("ChangePassword", {
+					body: `OldPassword=${oldPassword}&NewPassword=${passwordNew}&NewPasswordRepeat=${passwordNewRepeat}&__RequestVerificationToken=${antiForgeryToken}`,
+					headers: {
+						"Content-Type": "application/x-www-form-urlencoded",
+					},
+					method: "post",
+				})
+					.then(r => r.json())
+					.then(j => {
+						if (j.success === true) {
+							changePasswordFeedback.classList.remove("text-danger");
+							changePasswordFeedback.classList.add("text-success");
+							changePasswordFeedback.innerText = "Password successfuly changed";
+
+							changePasswordOldInput.value = "";
+							changePasswordNewInput.value = "";
+							changePasswordNewRepeatInput.value = "";
+
+							changePasswordForm.classList.remove("was-validated");
+						}
+						else {
+							changePasswordFeedback.classList.remove("text-success");
+							changePasswordFeedback.classList.add("text-danger");
+							j.errors.forEach(e => changePasswordFeedback.innerText += e + "\n");
+						}
+					});
+			}
+			else {
+				registerForm.reportValidity();
+				return;
+			}
+		});
 	});
 </script>
