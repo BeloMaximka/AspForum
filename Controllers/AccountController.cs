@@ -13,6 +13,7 @@ using AspForum.Data;
 using AspForum.Services.Email;
 using Microsoft.AspNetCore.Authorization;
 using AspForum.Models.Account;
+using AspForum.Models.Home;
 
 namespace AspForum.Controllers
 {
@@ -30,7 +31,6 @@ namespace AspForum.Controllers
             UserManager<User> userManager,
 			SignInManager<User> signInManager,
 			ILogger<AccountController> logger,
-			IEmailSender emailSender,
 			ApplicationContext context,
 			RoleManager<Role> roleManager,
 			IEmailService emailService)
@@ -84,10 +84,20 @@ namespace AspForum.Controllers
         {
             return View();
         }
-        #endregion
 
-        #region ResitrationLoginLogout
-        [HttpPost]
+		public IActionResult EmailChange()
+		{
+			return View();
+		}
+
+		public IActionResult EmailChangeSuccess()
+		{
+			return View();
+		}
+		#endregion
+
+		#region ResitrationLoginLogout
+		[HttpPost]
         public async Task<ResultWithManyErrorMessages> Register(RegisterViewModel model)
         {
             ResultWithManyErrorMessages result = new();
@@ -199,6 +209,149 @@ namespace AspForum.Controllers
             return RedirectToAction("Index", "Home");
         }
         #endregion
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ResultWithManyErrorMessages> RequestChangeEmail(string newEmail)
+        {
+            ResultWithManyErrorMessages result = new();
+            if(!ModelState.IsValid)
+            {
+                result.Errors.Add("All fields are reqiured.");
+                return result;
+            }
+            if (User.Identity is not null && User.Identity.IsAuthenticated &&
+                await _userManager.FindByNameAsync(User.Identity.Name) is User user)
+            {
+                var code = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+                var callbackUrl = Url.Action(
+                    "SendEmailChangeConfirmation",
+                    "Account",
+                    new { userId = user.Id, NewEmail = newEmail, code },
+                    protocol: HttpContext.Request.Scheme);
+                if (callbackUrl == null)
+                {
+                    result.Errors.Add("Unexpected error.");
+                    return result;
+                }
+                Models.EmailTemplates.ChangeEmailRequestModel model = new()
+                {
+                    Email = user.Email,
+                    NewEmail = newEmail,
+                    UserName = user.UserName,
+                    ChangeEmailLink = callbackUrl
+                };
+                await _emailService.SendAsync("ChangeEmailRequest", model);
+                result.Success = true;
+            }
+            else
+            {
+                result.Errors.Add("Unauthorized");
+            }
+            return result;
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ChangeEmail(string userId, string newEmail, string changeCode, string confirmationCode)
+        {
+            if (await _userManager.FindByIdAsync(userId) is User user)
+            {
+				if (!await _userManager.VerifyUserTokenAsync(user, 
+                    _userManager.Options.Tokens.EmailConfirmationTokenProvider, 
+                    UserManager<User>.ConfirmEmailTokenPurpose, confirmationCode))
+                {
+					ErrorMessageViewModel model = new()
+					{
+						ErrorMessage = "Confirmation code is invalid"
+					};
+					return RedirectToAction("ErrorMessage", "Home", model);
+				}
+				
+                var result = await _userManager.ChangeEmailAsync(user, newEmail, changeCode);
+                if(!result.Succeeded)
+                {
+                    ErrorMessageViewModel model = new()
+                    {
+                        ErrorMessage = "Change code is invalid"
+                    };
+                    return RedirectToAction("ErrorMessage", "Home", model);
+                }
+                
+                result = await _userManager.ConfirmEmailAsync(user, await _userManager.GenerateEmailConfirmationTokenAsync(user));
+                if (!result.Succeeded)
+                {
+                    ErrorMessageViewModel model = new()
+                    {
+                        ErrorMessage = "Unexpected error"
+                    };
+                    return RedirectToAction("ErrorMessage", "Home", model);
+                }
+				await _signInManager.RefreshSignInAsync(user);
+				return RedirectToAction("EmailChangeSuccess");
+            }
+            else
+            {
+                ErrorMessageViewModel model = new()
+                {
+                    ErrorMessage = "User id is invalid"
+                };
+                return RedirectToAction("ErrorMessage", "Home", model);
+            }
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendEmailChangeConfirmation(string userId, string newEmail, string code)
+        {
+            if(await _userManager.FindByIdAsync(userId) is User user)
+            {
+                if (await _userManager.VerifyUserTokenAsync(user, 
+                    _userManager.Options.Tokens.ChangeEmailTokenProvider, 
+                    UserManager<User>.GetChangeEmailTokenPurpose(newEmail), code))
+                {
+                    var confirmationCode = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var callbackUrl = Url.Action(
+                        "ChangeEmail",
+                        "Account",
+                        new { userId = user.Id, NewEmail = newEmail, ChangeCode = code, ConfirmationCode = confirmationCode },
+                        protocol: HttpContext.Request.Scheme);
+                    if (callbackUrl == null)
+                    {
+                        ErrorMessageViewModel errorModel = new()
+                        {
+                            ErrorMessage = "Unexpected error."
+                        };
+                        return RedirectToAction("ErrorMessage", "Home", errorModel);
+                    }
+                    Models.EmailTemplates.СonfirmEmailChange model = new()
+                    {
+                        OldEmail = user.Email,
+                        Email = newEmail,
+                        UserName = user.UserName,
+                        ChangeEmailLink = callbackUrl
+                    };
+                    await _emailService.SendAsync("ConfirmEmailChange", model);
+                    return RedirectToAction("EmailChange");
+                }
+                else
+                {
+                    ErrorMessageViewModel model = new()
+                    {
+                        ErrorMessage = "Code is invalid"
+                    };
+                    return RedirectToAction("ErrorMessage", "Home", model);
+                }
+            }
+            else
+            {
+                ErrorMessageViewModel model = new()
+                {
+                    ErrorMessage = "User id is invalid"
+                };
+                return RedirectToAction("ErrorMessage", "Home", model);
+            }
+        }
 
         [HttpGet]
 		[AllowAnonymous]
@@ -314,6 +467,7 @@ namespace AspForum.Controllers
 			return RedirectToAction("Manage");
 		}
 
+        // Add claims, send email confirmation letter
         private async Task FinishRegistration(User user)
         {
             List<Claim> claims = new()

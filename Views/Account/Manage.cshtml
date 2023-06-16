@@ -1,4 +1,5 @@
-﻿@*
+﻿@using System.Security.Claims
+@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
@@ -7,6 +8,7 @@
 @if (User.Identity is not null && User.Identity.IsAuthenticated) 
 {
 	string? userAvatar = Context.User.FindFirst("Avatar")?.Value;
+	string? email = Context.User.FindFirst(ClaimTypes.Email)?.Value;
 
 	<div class="row">
 		<div class="col d-flex align-items-center flex-column">
@@ -52,6 +54,30 @@
 				<div id="changePasswordFeedback" class="text-danger"></div>
 			</form>
 			<hr class="my-4">
+
+			<h3 class="mb-3">Change email</h3>
+			<form id="changeEmailForm" class="text-center needs-validation" method="post">
+				<!-- Current email input -->
+				<div class="form-outline form-auth-mdb mb-4">
+					<input type="text" id="currentEmail" value="@email" readonly class="form-control" autocomplete="off">
+					<label class="form-label" style="margin-left: 0px;">Your email</label>
+					<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
+				</div>
+
+				<!-- New email input -->
+				<div class="form-outline form-auth-mdb mb-4">
+					<input type="email" id="newEmail" class="form-control" autocomplete="off" required="" minlength="5">
+					<label class="form-label" style="margin-left: 0px;">Your new email</label>
+					<div class="invalid-feedback">Please provide a valid email.</div>
+					<div class="form-notch"><div class="form-notch-leading" style="width: 9px;"></div><div class="form-notch-middle" style="width: 8px;"></div><div class="form-notch-trailing"></div></div>
+				</div>
+
+				<button class="btn btn-primary btn-block mb-3" id="changeEmalBtn" type="button">
+					Change email
+				</button>
+
+				<div id="changeEmailFeedback" class="text-danger"></div>
+			</form>
 		</div>
 	</div>
 
@@ -163,6 +189,50 @@ else
 							changePasswordFeedback.classList.remove("text-success");
 							changePasswordFeedback.classList.add("text-danger");
 							j.errors.forEach(e => changePasswordFeedback.innerText += e + "\n");
+						}
+					});
+			}
+			else {
+				registerForm.reportValidity();
+				return;
+			}
+		});
+
+		// Change email
+		const changeEmailForm = document.getElementById("changeEmailForm");
+		const changeEmalBtn = document.getElementById("changeEmalBtn");
+		const newEmailInput = document.getElementById("newEmail");
+		const changeEmailFeedback = document.getElementById("changeEmailFeedback");
+		
+		changeEmalBtn.addEventListener("click", () => {
+			changeEmailForm.classList.add("was-validated");
+			changeEmailFeedback.innerText = "";
+
+			if (changeEmailForm.checkValidity()) {
+				const email = newEmailInput.value;
+
+				fetch("RequestChangeEmail", {
+					body: `newEmail=${email}&__RequestVerificationToken=${antiForgeryToken}`,
+					headers: {
+						"Content-Type": "application/x-www-form-urlencoded",
+					},
+					method: "post",
+				})
+					.then(r => r.json())
+					.then(j => {
+						if (j.success === true) {
+							changeEmailFeedback.classList.remove("text-danger");
+							changeEmailFeedback.classList.add("text-success");
+							changeEmailFeedback.innerText = "A letter sent to you email adress.";
+
+							newEmailInput.value = "";
+
+							changeEmailForm.classList.remove("was-validated");
+						}
+						else {
+							changeEmailFeedback.classList.remove("text-success");
+							changeEmailFeedback.classList.add("text-danger");
+							j.errors.forEach(e => changeEmailFeedback.innerText += e + "\n");
 						}
 					});
 			}

@@ -1,4 +1,5 @@
 ﻿using AspForum.Models;
+using AspForum.Models.Home;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -26,6 +27,11 @@ namespace AspForum.Controllers
         public IActionResult PageNotFound()
         {
             return View();
+        }
+
+        public IActionResult ErrorMessage(ErrorMessageViewModel model) 
+        {
+            return View(model);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
