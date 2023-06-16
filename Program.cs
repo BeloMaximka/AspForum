@@ -2,6 +2,7 @@ using AspForum.Data.Entities;
 using AspForum.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using AspForum.Services.Email;
 
 namespace AspForum
 {
@@ -13,6 +14,7 @@ namespace AspForum
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+			builder.Services.AddSingleton<IEmailService, GmailService>();
 
 			var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 			builder.Services.AddDbContext<ApplicationContext>(options =>

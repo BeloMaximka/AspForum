@@ -10,6 +10,8 @@ using System.Text;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using AspForum.Data;
+using AspForum.Services.Email;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AspForum.Controllers
 {
@@ -21,21 +23,22 @@ namespace AspForum.Controllers
 		private readonly RoleManager<Role> _roleManager;
 		private readonly SignInManager<User> _signInManager;
 		private readonly ILogger<AccountController> _logger;
-		private readonly IEmailSender _emailSender;
+		private readonly IEmailService _emailService;
 
 		public AccountController(UserManager<User> userManager,
 			SignInManager<User> signInManager,
 			ILogger<AccountController> logger,
 			IEmailSender emailSender,
 			ApplicationContext context,
-			RoleManager<Role> roleManager)
+			RoleManager<Role> roleManager,
+			IEmailService emailService)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
 			_logger = logger;
-			_emailSender = emailSender;
 			_context = context;
 			_roleManager = roleManager;
+			_emailService = emailService;
 		}
 
 		public IActionResult Index()
@@ -43,7 +46,12 @@ namespace AspForum.Controllers
 			return View();
 		}
 
-		public async Task<IActionResult> Profile([FromRoute] Guid id)
+        public IActionResult EmailConfirmed()
+        {
+            return View();
+        }
+
+        public async Task<IActionResult> Profile([FromRoute] Guid id)
 		{
 			User? user = await _context.Users.Include(u => u.Roles).FirstOrDefaultAsync(t => t.Id == id);
 			if(user == null)
@@ -85,7 +93,7 @@ namespace AspForum.Controllers
 
 				if (userResult.Succeeded)
 				{
-					await ApplyNewUserInfo(user);
+					await FinishRegistration(user);
 					await _signInManager.SignInAsync(user, false);
 					result.Success = true;
 					return result;
@@ -163,7 +171,7 @@ namespace AspForum.Controllers
 					userResult = await _userManager.AddLoginAsync(user, info);
 					if (userResult.Succeeded)
 					{
-						await ApplyNewUserInfo(user);
+						await FinishRegistration(user);
 						_logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
 						await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
@@ -186,7 +194,35 @@ namespace AspForum.Controllers
 			return RedirectToAction("Index", "Home");
 		}
 
-		private async Task ApplyNewUserInfo(User user)
+		[HttpGet]
+		[AllowAnonymous]
+		public async Task<IActionResult> ConfirmEmail(string userId, string code)
+		{
+			// TODO BETTER ERROR HANDLING
+			if (userId == null || code == null)
+			{
+				return RedirectToAction("PageNotFound", "Home");
+			}
+			var user = await _userManager.FindByIdAsync(userId);
+			if (user == null)
+			{
+				return RedirectToAction("PageNotFound", "Home");
+			}
+			var result = await _userManager.ConfirmEmailAsync(user, code);
+			if (result.Succeeded)
+			{
+				await _userManager.AddToRoleAsync(user, "User");
+				await _userManager.RemoveFromRoleAsync(user, "NotConfirmed");
+                await _signInManager.RefreshSignInAsync(user);
+                return RedirectToAction("EmailConfirmed");
+			}
+			else
+			{
+				return RedirectToAction("PageNotFound", "Home");
+			}
+		}
+
+		private async Task FinishRegistration(User user)
 		{
 			List<Claim> claims = new () 
 			{
@@ -198,6 +234,25 @@ namespace AspForum.Controllers
 			}
 			await _userManager.AddClaimsAsync(user, claims);
 			await _userManager.AddToRoleAsync(user, "NotConfirmed");
+
+			// Email confirmation
+			var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+			var callbackUrl = Url.Action(
+				"ConfirmEmail",
+				"Account",
+				new { userId = user.Id, code = code },
+				protocol: HttpContext.Request.Scheme);
+			if(callbackUrl == null)
+			{
+				return; // TODO ERROR HANDLING
+			}
+			Models.EmailTemplates.ConfirmEmailModel model = new()
+			{
+				Email = user.Email,
+				UserName = user.UserName,
+				ConfirmLink = callbackUrl
+			};
+			await _emailService.SendAsync("ConfirmEmail", model);
 		}
 
 		[HttpPost]
