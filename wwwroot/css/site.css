@@ -46,3 +46,8 @@ body {
 .color-bg-dark {
     background-color: #303030 !important;
 }
+
+.nav-pills:not(.menu-sidebar) .nav-link.active, .nav-pills:not(.menu-sidebar) .show > .nav-link {
+    color: #262626;
+    background-color: #e3ebf7;
+}

@@ -51,8 +51,12 @@
 				</div>
 				
 
+				@if(User.Identity is not null && User.Identity.IsAuthenticated && !User.IsInRole("NotConfirmed"))
+				{
 				<button type="button" class="btn btn-link mt-auto fw-bold align-self-end" 
-						data-mdb-ripple-color="light" reply-post-id="@Model.Id">Reply</button>
+						data-mdb-ripple-color="light" reply-post-id="@Model.Id">Reply</button>	
+				}
+				
 			</div>
 		</div>
 	</div>

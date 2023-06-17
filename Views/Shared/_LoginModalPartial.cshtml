@@ -39,8 +39,10 @@
 											<a rel="nofollow" href="" title="Connect with Facebook" class="btn btn-primary btn-floating mx-1 ripple-surface" data-provider="Facebook" role="button" style="min-width: 37px;"><i class="fab fa-facebook-f"></i></a>
 									-->
 									<form method="post" asp-controller="Account" asp-action="ExternalLogin">
-										<button asp-controller="Account" asp-action="ExternalLogin" 
-											type="submit" class="btn btn-primary btn-floating mx-1" title="Connect with Google" name="provider" value="Google"><i class="fab fa-google"></i></button>
+										<button asp-controller="Account" asp-action="ExternalLogin"
+											type="submit" class="btn btn-secondary btn-floating mx-1" title="Connect with Google" name="provider" value="Google">
+											<i class="fab fa-google"></i>
+										</button>
 									</form>
 									<!--
 											<a rel="nofollow" href="" title="Connect with Twitter" class="btn btn-primary btn-floating mx-1" data-provider="Twitter" role="button"><i class="fab fa-twitter"></i></a>
@@ -78,7 +80,7 @@
 								<a href="">Forgot password?</a>
 							</div>
 
-							<button id="LoginBtn" class="btn btn-primary btn-block mb-4" type="button">Sign in</button>
+							<button id="LoginBtn" class="btn btn-secondary btn-block mb-4" type="button">Sign in</button>
 
 							<div id="loginFeedback" class="text-danger"></div>
 
@@ -105,8 +107,10 @@
 											<a rel="nofollow" href="" title="Connect with Facebook" class="btn btn-primary btn-floating mx-1 ripple-surface" data-provider="Facebook" role="button" style="min-width: 37px;"><i class="fab fa-facebook-f"></i></a>
 										-->
 										<form method="post" asp-controller="Account" asp-action="ExternalLogin">
-											<button asp-controller="Account" asp-action="ExternalLogin" 
-												type="submit" class="btn btn-primary btn-floating mx-1" title="Connect with Google" name="provider" value="Google"><i class="fab fa-google"></i></button>
+											<button asp-controller="Account" asp-action="ExternalLogin"
+												 type="submit" class="btn btn-secondary btn-floating mx-1" title="Connect with Google" name="provider" value="Google">
+												<i class="fab fa-google"></i>
+											</button>
 										</form>
 										<!--
 											<a rel="nofollow" href="" title="Connect with Twitter" class="btn btn-primary btn-floating mx-1" data-provider="Twitter" role="button"><i class="fab fa-twitter"></i></a>
@@ -157,7 +161,7 @@
 								<label class="form-check-label" for="registerIsAgree">I have read and agree to the terms</label>
 							</div>
 
-							<button class="btn btn-primary btn-block mb-3" id="RegisterBtn" type="button" onsubmit="return false" value="SIGNUP">
+							<button class="btn btn-secondary btn-block mb-3" id="RegisterBtn" type="button" onsubmit="return false" value="SIGNUP">
 								Sign up
 							</button>
 

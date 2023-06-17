@@ -14,7 +14,7 @@
 		<div class="my-3">@Model.Role</div>
 		@if(User.Identity is not null && User.Identity.Name == Model.UserName)
 		{
-			<a class="btn btn-primary" asp-action="Manage">Manage</a>
+			<a class="btn btn-secondary" asp-action="Manage">Manage</a>
 		}
 	</div>
 	<div class="col-10">

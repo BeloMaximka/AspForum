@@ -40,14 +40,14 @@
 							 style="width: 40px; height: 40px; border-radius: 100%">
 						<a asp-controller="Account" asp-action="Profile" asp-route-id="@userId">@User.Identity.Name</a>
 						<form method="post" style="display: inline-block" asp-controller="Account" asp-action="Logout">
-							<input class="btn btn-primary" style="margin-left: 8px" type="submit" value="Log Out" />
+							<input class="btn btn-secondary" style="margin-left: 8px" type="submit" value="Log Out" />
 						</form>
 					</div>
 					
 				}
 				else
 				{
-					<button type="button" class="btn btn-primary ms-2 me-1" data-mdb-toggle="modal" data-mdb-target="#loginModal">Login</button>
+					<button type="button" class="btn btn-secondary ms-2 me-1" data-mdb-toggle="modal" data-mdb-target="#loginModal">Login</button>
 				}
 
 				<partial name="_LoginModalPartial" />

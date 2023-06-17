@@ -11,7 +11,7 @@
 		@if (User.Identity is not null && User.Identity.IsAuthenticated && !User.IsInRole("NotConfirmed"))
 		{
 			<!-- Add topic button -->
-			<button id="addTopicBtn" type="button" class="btn btn-primary"
+			<button id="addTopicBtn" type="button" class="btn btn-secondary"
 					data-mdb-toggle="modal"
 					data-mdb-target="#addTopicModal"
 					data-theme-id="@Model.Id.ToString()">
@@ -50,7 +50,7 @@
 						</div>
 					</div>
 					<div class="modal-footer">
-						<button type="submit" asp-action="CreateTopic" class="btn btn-primary">Add</button>
+						<button type="submit" asp-action="CreateTopic" class="btn btn-secondary">Add</button>
 					</div>
 				</form>
 			</div>
