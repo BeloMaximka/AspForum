@@ -20,7 +20,7 @@
 
 <div class="card mb-3">
 	<div class="card-body">
-		<h2>@Model.Title</h2>
+		<h2 id="topicTitle">@Model.Title</h2>
 		<hr />
 		<div class="d-flex align-items-center ">
 			<img src="~/img/@(string.IsNullOrEmpty(Model.AuthorAvatarURL) ? "default-avatar.png" : $"avatars/{Model.AuthorAvatarURL}")" alt="avatar"
@@ -45,22 +45,31 @@
 {
 	<div class="card mb-3">
 		<div class="card-body">
-			<h5 class="d-inline-block">Reply to </h5><h6 class="d-inline-block mx-1">"@Model.Title"</h6>
+			<h5 class="d-inline-block">Reply to </h5><h6 id="replyTo" class="d-inline-block mx-1">"@Model.Title"</h6>
 			<form id="addPostForm" class="text-center mt-1 needs-validation d-flex justify-content-start flex-column" method="post">
 				<input id="topicId" name="topicid" value="@Model.Id" hidden />
+				<input id="replyId" name="replyid" hidden />
 				<textarea id="replyContent" class="md-textarea form-control mb-3" name="content" rows="3"></textarea>
 				<button type="submit" asp-action="CreatePost" class="btn btn-primary">Post</button>
 			</form>
 		</div>
 	</div>
-}
 
-@if(User.Identity is not null && User.Identity.IsAuthenticated)
-{
 	<script>
-		for (let elem of document.querySelectorAll("[rating-item-id]")) {
-			elem.addEventListener('click', ratingClick);
-		}
+		document.addEventListener("DOMContentLoaded", () => {
+			// Likes
+			for (let elem of document.querySelectorAll("[rating-item-id]")) {
+				elem.addEventListener('click', ratingClick);
+			}
+
+			// Reply
+			const replyButtons = document.querySelectorAll("[reply-post-id]");
+			for (let i = 1; i < replyButtons.length; i++) {
+				replyButtons[i].addEventListener('click', replyClick);
+			}
+			replyButtons[0].addEventListener('click', replyTopicClick);
+		});
+		
 		function ratingClick(e) {
 
 			const data = {
@@ -116,5 +125,21 @@
 					}
 				})
 		}
+
+		function replyClick(e) {
+			const id = e.currentTarget.getAttribute("reply-post-id");
+			document.getElementById("replyId").value = id;
+			let replyText = e.currentTarget.parentElement.getElementsByClassName("post-content")[0].innerText;
+			if(replyText.length > 20) {
+				replyText = replyText.slice(20);
+			}
+			document.getElementById("replyTo").innerText = `"${replyText}"`;
+		}
+
+		function replyTopicClick(e) {
+			document.getElementById("replyId").value = "";
+			document.getElementById("replyTo").innerText = `"${document.getElementById("topicTitle").innerText}"`;
+		}
+
 	</script>
 }

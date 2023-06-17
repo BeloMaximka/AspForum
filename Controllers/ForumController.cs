@@ -93,6 +93,7 @@ namespace AspForum.Controllers
 				Posts = await _context.Posts
 								.Where(p => p.TopicId == topic.Id)
 								.Include(p => p.Author)
+								.Include(p => p.Reply)
 								.Include(p => p.Author.Roles)
 								.Select(p => new PostViewModel()
 								{
@@ -105,7 +106,13 @@ namespace AspForum.Controllers
 									CreationDateString = p.CreatedDt.ToShortDateString(),
 									Likes = p.Rates.Count(r => r.Rating > 0),
 									Dislikes = p.Rates.Count(r => r.Rating < 0),
-									UserRating = userId == null ? null : (p.Rates.FirstOrDefault(r => r.UserId == userId && r.ItemId == p.Id) == null ? null : p.Rates.FirstOrDefault(r => r.UserId == userId && r.ItemId == p.Id)!.Rating)
+									UserRating = userId == null ? null : (p.Rates.FirstOrDefault(r => r.UserId == userId && r.ItemId == p.Id) == null ? null : p.Rates.FirstOrDefault(r => r.UserId == userId && r.ItemId == p.Id)!.Rating),
+									Reply = p.Reply == null ? null : new PostViewModel()
+									{
+										AuthorName = p.Reply.Author.UserName,
+										AuthorId = p.Reply.AuthorId.ToString(),
+										Content = p.Reply.Content
+									},
 								}).ToListAsync()
 			};
 			return View(model);
@@ -193,6 +200,7 @@ namespace AspForum.Controllers
 					TopicId = model.TopicId,
 					AuthorId = (await _userManager.FindByNameAsync(User.Identity.Name)).Id,
 					Content = model.Content,
+					ReplyId = model.ReplyId,
 					CreatedDt = DateTime.UtcNow
 				});
 				try

@@ -42,3 +42,7 @@ body {
 #avatarImage span {
     width: 100%;
 }
+
+.color-bg-dark {
+    background-color: #303030 !important;
+}
